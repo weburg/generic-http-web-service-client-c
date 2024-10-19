@@ -41,11 +41,11 @@ int main(int argc, char *argv[])
 ### Running the example
 
 First, ensure the server is running. Refer to other grouped GHoWSt projects to
-get and run the server.
+get and run the server. Ensure a compiler (GCC, MSVC were tested) is installed.
+Ensure vcpkg is installed (it doesn't have to be on the PATH for the CLI build
+to work). Ensure CMake is installed.
 
-If using the CLI, ensure a compiler (GCC, MSVC were tested) is installed, ensure
-vcpkg is installed (it doesn't have to be on the PATH), and ensure CMake is
-installed. Ensure you are in the project directory. Run:
+If using the CLI, ensure you are in the project directory. Run:
 
 ```
 cmake -S . -B build "-DCMAKE_TOOLCHAIN_FILE=<vcpkg root>/scripts/buildsystems/vcpkg.cmake"
