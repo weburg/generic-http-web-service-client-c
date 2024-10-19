@@ -55,7 +55,7 @@ cd build
 ```
 
 > [!NOTE]
-> Change <vcpkg root> to match your installation. The last command's forward slash should be a backslash if on Windows.
+> Change `<vcpkg root>` to match your installation. The last command's forward slash should be a backslash if on Windows.
 
 If using an IDE, ensure it supports CMake and that the project profile
 configures CMAKE_TOOLCHAIN_FILE to use vcpkg. Now, you should only need to run
