@@ -1,0 +1,13 @@
+{
+  "dependencies": [
+    {
+      "name": "cjson",
+      "version>=": "1.7.17"
+    },
+    {
+      "name": "curl",
+      "version>=": "8.9.1#1"
+    }
+  ],
+  "builtin-baseline": "0f88ecb8528605f91980b90a2c5bad88e3cb565f"
+}
