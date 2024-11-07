@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
             .cylinders = 44,
             .throttle_setting = 49
     };
-    int engine_id = create_engines(base_url, engine_create);
+    int engine_id1 = create_engines(base_url, engine_create);
 
     return EXIT_SUCCESS;
 }
@@ -59,7 +59,8 @@ cd build
 
 If using an IDE, ensure it supports CMake and that the project profile
 configures CMAKE_TOOLCHAIN_FILE to use vcpkg. Now, you should only need to run
-the below file after the project is set up:
+the below file which should, after the CMake project builds, compile and run for
+you:
 
 `run_example_generic_http_web_service_client.c`
 
