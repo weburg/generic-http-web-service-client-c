@@ -4,14 +4,14 @@
 #include <stdio.h>
 
 struct url_parameter {
-	char *name;
+    char *name;
 
-	// For non-FILE types
-	char *value;
+    // For non-FILE types
+    char *value;
 
-	// Only for a file upload, set file to NULL for non_FILE types
-	FILE *file;
-	char *file_name;
+    // Only for a file upload, set file to NULL for non_FILE types
+    FILE *file;
+    char *file_name;
 };
 
 char *_underbar_to_camel(char *dest, const char *str);
