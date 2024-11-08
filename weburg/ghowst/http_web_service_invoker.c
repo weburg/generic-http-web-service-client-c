@@ -69,6 +69,105 @@ static _Bool starts_with(const char *string, const char *prefix)
 	return true;
 }
 
+char *_underbar_to_camel(char *dest, const char *str)
+{
+    char *dest_copy = dest;
+
+    _Bool uppercase_next = false;
+
+    while (*str != '\0') {
+        if (uppercase_next) {
+            *dest_copy = (char) toupper(*str);
+            uppercase_next = false;
+        } else if (*str != '_') {
+            *dest_copy = (char) *str;
+        }
+
+        if (*str == '_') {
+            uppercase_next = true;
+        } else {
+            dest_copy++;
+        }
+
+        str++;
+    }
+
+    *dest_copy = '\0';
+
+    return dest;
+}
+
+/*
+def _underbar_to_camel(string):
+new_string = ''
+
+upper_next = False
+for char in string:
+if char == '_':
+upper_next = True
+continue
+
+if upper_next:
+new_string += char.upper()
+upper_next = False
+else:
+new_string += char
+
+return new_string
+*/
+
+char *_generate_form_data(struct url_parameter *arguments, int num_args)
+{
+    CURL *curl_handle = curl_easy_init();
+
+    char *qs = calloc(99, sizeof(char));
+
+    for (int i = 0; i < num_args; i++, arguments++) {
+        char *escaped_value = curl_easy_escape(curl_handle, arguments->value, strlen(arguments->value));
+
+        if (i > 0) {
+            strncat(qs, "&", 1);
+        }
+
+        strncat(qs, arguments->name, strlen(arguments->name));
+        strncat(qs, "=", 1);
+        strncat(qs, escaped_value, strlen(escaped_value));
+
+        curl_free(escaped_value);
+    }
+
+    curl_easy_cleanup(curl_handle);
+
+    return qs;
+}
+
+char *_generate_qs(struct url_parameter *arguments, int num_args)
+{
+    char *qs = calloc(99, sizeof(char));
+
+    if (num_args > 0) {
+        strncat(qs, "?", 1);
+    }
+
+    char *form_data = _generate_form_data(arguments, num_args);
+
+    strncat(qs, form_data, strlen(form_data));
+
+    free(form_data);
+
+    return qs;
+}
+
+char *_generate_mimeqs()
+{
+    // TODO move the file upload field generation code here to support file
+    // uploads in other calls.
+
+    char *qs = {"\0"};
+
+    return qs;
+}
+
 char *invoke(const char *method_name, struct url_parameter *arguments, int num_args, char *base_url)
 {
 	char verb[20];
@@ -108,25 +207,13 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 	CURL *curl_handle = curl_easy_init();
 
 	if (strcmp(verb, "get") == 0) {
-		char id_urlsafe[20] = {0};
-
-		for (int i = 0; i < num_args; i++, arguments++) {
-			if (strcmp(arguments->name, "id") == 0 && strcmp(arguments->value, "0") != 0) {
-				char *id_o = curl_easy_escape(curl_handle, arguments->value, 0);
-				strncpy(id_urlsafe, id_o, 20);
-				curl_free(id_o);
-			}
-		}
+        char *query_string = _generate_qs(arguments, num_args);
 
 		char ws_url[300];
 		strncpy(ws_url, base_url, 150);
 		strncat(ws_url, "/", 1);
 		strncat(ws_url, entity, 50);
-
-		if (strlen(id_urlsafe) > 0) {
-			strncat(ws_url, "?id=", 4);
-			strncat(ws_url, id_urlsafe, 20);
-		}
+        strncat(ws_url, query_string, strlen(query_string));
 
 		curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
 
@@ -134,14 +221,14 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 		result_code = curl_easy_perform(curl_handle);
 
+        free(query_string);
+
 		if (result_code == CURLE_OK) { // TODO better error handling
 			//printf("The cURL request was good: %s\n", chunk.memory);
 		} else {
 			printf("The cURL request went to heck\n");
 		}
 	} else if (strcmp(verb, "create") == 0) {
-		char query_string[512] = {0};
-
 		_Bool has_file = false;
 		struct url_parameter *arguments_copy;
 
@@ -162,17 +249,10 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 
 		curl_mime *mime_handle;
 
+        char *query_string = NULL;
+
 		if (!has_file) {
-			arguments_copy = arguments;
-			for (int i = 0, param_count = 0; i < num_args; i++, arguments_copy++) {
-				if (param_count > 0) {
-					strncat(query_string, "&", 1);
-				}
-				strncat(query_string, arguments_copy->name, 20);
-				strncat(query_string, "=", 1);
-				strncat(query_string, arguments_copy->value, 64); // TODO need to escape this
-				param_count++;
-			}
+            query_string = _generate_form_data(arguments, num_args);
 
 			curl_easy_setopt(curl_handle, CURLOPT_POST, true);
 			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, query_string);
@@ -207,6 +287,10 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 		result_code = curl_easy_perform(curl_handle);
 
+        if (query_string != NULL) {
+            free(query_string);
+        }
+
 		if (result_code == CURLE_OK) { // TODO better error handling
 			//printf("The cURL request was good: %s\n", chunk.memory);
 		} else {
@@ -224,36 +308,12 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 			}
 		}
 	} else if (strcmp(verb, "create_or_replace") == 0) {
-		char id_urlsafe[20] = {0};
-		char query_string[512] = {0};
-
-		for (int i = 0, param_count = 0; i < num_args; i++, arguments++) {
-			if (arguments->file == NULL) {
-				if (strcmp(arguments->name, "id") == 0) {
-					char *id_o = curl_easy_escape(curl_handle, arguments->value, 0);
-					strncpy(id_urlsafe, id_o, 20);
-					curl_free(id_o);
-				} else {
-					if (param_count > 0) {
-						strncat(query_string, "&", 1);
-					}
-					strncat(query_string, arguments->name, 20);
-					strncat(query_string, "=", 1);
-					strncat(query_string, arguments->value, 64); // TODO need to escape this
-					param_count++;
-				}
-			}
-		}
+        char *query_string = _generate_form_data(arguments, num_args);
 
 		char ws_url[300];
 		strncpy(ws_url, base_url, 150);
 		strncat(ws_url, "/", 1);
 		strncat(ws_url, entity, 50);
-
-		if (strlen(id_urlsafe) > 0) {
-			strncat(ws_url, "?id=", 4);
-			strncat(ws_url, id_urlsafe, 20);
-		}
 
 		curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
 		curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -263,42 +323,20 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 		result_code = curl_easy_perform(curl_handle);
 
+        free(query_string);
+
 		if (result_code == CURLE_OK) { // TODO better error handling
 			//printf("The cURL request was good: %s\n", chunk.memory);
 		} else {
 			printf("The cURL request went to heck\n");
 		}
 	} else if (strcmp(verb, "update") == 0) {
-		char id_urlsafe[20] = {0};
-		char query_string[512] = {0};
-
-		for (int i = 0, param_count = 0; i < num_args; i++, arguments++) {
-			if (arguments->file == NULL) {
-				if (strcmp(arguments->name, "id") == 0) {
-					char *id_o = curl_easy_escape(curl_handle, arguments->value, 0);
-					strncpy(id_urlsafe, id_o, 20);
-					curl_free(id_o);
-				} else {
-					if (param_count > 0) {
-						strncat(query_string, "&", 1);
-					}
-					strncat(query_string, arguments->name, 20);
-					strncat(query_string, "=", 1);
-					strncat(query_string, arguments->value, 64); // TODO need to escape this
-					param_count++;
-				}
-			}
-		}
+        char *query_string = _generate_form_data(arguments, num_args);
 
 		char ws_url[300];
 		strncpy(ws_url, base_url, 150);
 		strncat(ws_url, "/", 1);
 		strncat(ws_url, entity, 50);
-
-		if (strlen(id_urlsafe) > 0) {
-			strncat(ws_url, "?id=", 4);
-			strncat(ws_url, id_urlsafe, 20);
-		}
 
 		curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
 		curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
@@ -308,31 +346,21 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 		result_code = curl_easy_perform(curl_handle);
 
+        free(query_string);
+
 		if (result_code == CURLE_OK) { // TODO better error handling
 			//printf("The cURL request was good: %s\n", chunk.memory);
 		} else {
 			printf("The cURL request went to heck\n");
 		}
 	} else if (strcmp(verb, "delete") == 0) {
-		char id_urlsafe[20] = {0};
-
-		for (int i = 0; i < num_args; i++, arguments++) {
-			if (strcmp(arguments->name, "id") == 0) {
-				char *id_o = curl_easy_escape(curl_handle, arguments->value, 0);
-				strncpy(id_urlsafe, id_o, 20);
-				curl_free(id_o);
-			}
-		}
+        char *query_string = _generate_qs(arguments, num_args);
 
 		char ws_url[300];
 		strncpy(ws_url, base_url, 150);
 		strncat(ws_url, "/", 1);
 		strncat(ws_url, entity, 50);
-
-		if (strlen(id_urlsafe) > 0) {
-			strncat(ws_url, "?id=", 4);
-			strncat(ws_url, id_urlsafe, 20);
-		}
+        strncat(ws_url, query_string, strlen(query_string));
 
 		curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
 		curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -341,21 +369,15 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 		result_code = curl_easy_perform(curl_handle);
 
+        free(query_string);
+
 		if (result_code == CURLE_OK) { // TODO better error handling
 			//printf("The cURL request was good: %s\n", chunk.memory);
 		} else {
 			printf("The cURL request went to heck\n");
 		}
 	} else {
-		char id_urlsafe[20] = {0};
-
-		for (int i = 0; i < num_args; i++, arguments++) {
-			if (strcmp(arguments->name, "id") == 0) {
-				char *id_o = curl_easy_escape(curl_handle, arguments->value, 0);
-				strncpy(id_urlsafe, id_o, 20);
-				curl_free(id_o);
-			}
-		}
+        char *query_string = _generate_form_data(arguments, num_args);
 
 		char ws_url[300];
 		strncpy(ws_url, base_url, 150);
@@ -364,19 +386,16 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 		strncat(ws_url, "/", 1);
 		strncat(ws_url, verb, 50);
 
-		if (strlen(id_urlsafe) > 0) {
-			strncat(ws_url, "?id=", 4);
-			strncat(ws_url, id_urlsafe, 20);
-		}
-
 		curl_handle = curl_easy_init();
 		curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
 		curl_easy_setopt(curl_handle, CURLOPT_POST, true);
-		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, ""); // Empty string required if no actual POST data
+		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, query_string);
 
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 		result_code = curl_easy_perform(curl_handle);
+
+        free(query_string);
 
 		if (result_code == CURLE_OK) { // TODO better error handling
 			//printf("The cURL request was good: %s\n", chunk.memory);

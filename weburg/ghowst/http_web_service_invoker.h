@@ -14,6 +14,8 @@ struct url_parameter {
 	char *file_name;
 };
 
+char *_underbar_to_camel(char *dest, const char *str);
+
 char *invoke(const char *method_name, struct url_parameter *arguments, int num_args, char *base_url);
 
 #endif //HTTP_WEB_SERVICE_INVOKER_H
