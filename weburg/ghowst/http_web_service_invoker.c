@@ -97,25 +97,6 @@ char *_underbar_to_camel(char *dest, const char *str)
     return dest;
 }
 
-/*
-def _underbar_to_camel(string):
-new_string = ''
-
-upper_next = False
-for char in string:
-if char == '_':
-upper_next = True
-continue
-
-if upper_next:
-new_string += char.upper()
-upper_next = False
-else:
-new_string += char
-
-return new_string
-*/
-
 char *_generate_form_data(struct url_parameter *arguments, int num_args)
 {
     CURL *curl_handle = curl_easy_init();
@@ -205,6 +186,7 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
     chunk.size = 0; /* no data at this point */
     curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl_handle = curl_easy_init();
+    struct curl_slist *headers = curl_slist_append(NULL, "accept: text/json");
 
     if (strcmp(verb, "get") == 0) {
         char *query_string = _generate_qs(arguments, num_args);
@@ -219,6 +201,8 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+
         result_code = curl_easy_perform(curl_handle);
 
         free(query_string);
@@ -285,6 +269,8 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+
         result_code = curl_easy_perform(curl_handle);
 
         if (query_string != NULL) {
@@ -321,6 +307,8 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+
         result_code = curl_easy_perform(curl_handle);
 
         free(query_string);
@@ -344,6 +332,8 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+
         result_code = curl_easy_perform(curl_handle);
 
         free(query_string);
@@ -367,6 +357,8 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+
         result_code = curl_easy_perform(curl_handle);
 
         free(query_string);
@@ -393,6 +385,8 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
 
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+
         result_code = curl_easy_perform(curl_handle);
 
         free(query_string);
@@ -404,6 +398,7 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
         }
     }
 
+    curl_slist_free_all(headers);
     curl_easy_cleanup(curl_handle);
     curl_global_cleanup();
     return chunk.memory;
