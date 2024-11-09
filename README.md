@@ -26,12 +26,12 @@ char *base_url = "http://localhost:8081/generichttpws";
 int main(int argc, char *argv[])
 {
     // Create
-    engine engine_create = {
+    engine engine = {
             .name = "CengineGenerated",
             .cylinders = 44,
             .throttle_setting = 49
     };
-    int engine_id1 = create_engines(base_url, engine_create);
+    int engine_id1 = create_engines(base_url, engine);
 
     return EXIT_SUCCESS;
 }
