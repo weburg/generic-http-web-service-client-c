@@ -101,7 +101,7 @@ char *_generate_form_data(struct url_parameter *arguments, int num_args)
 {
     CURL *curl_handle = curl_easy_init();
 
-    char *qs = calloc(99, sizeof(char));
+    char *qs = calloc((128 * num_args) + 1, sizeof(char));
 
     for (int i = 0; i < num_args; i++, arguments++) {
         char *escaped_value = curl_easy_escape(curl_handle, arguments->value, strlen(arguments->value));
@@ -110,9 +110,11 @@ char *_generate_form_data(struct url_parameter *arguments, int num_args)
             strncat(qs, "&", 1);
         }
 
-        strncat(qs, arguments->name, strlen(arguments->name));
+        char *new_name = calloc(strlen(arguments->name) + 1, sizeof(char));
+        strncat(qs, _underbar_to_camel(new_name, arguments->name), strlen(arguments->name));
         strncat(qs, "=", 1);
         strncat(qs, escaped_value, strlen(escaped_value));
+        free(new_name);
 
         curl_free(escaped_value);
     }
@@ -128,13 +130,13 @@ char *_generate_qs(struct url_parameter *arguments, int num_args)
 
     if (num_args > 0) {
         strncat(qs, "?", 1);
+
+        char *form_data = _generate_form_data(arguments, num_args);
+
+        strncat(qs, form_data, strlen(form_data));
+
+        free(form_data);
     }
-
-    char *form_data = _generate_form_data(arguments, num_args);
-
-    strncat(qs, form_data, strlen(form_data));
-
-    free(form_data);
 
     return qs;
 }

@@ -5,18 +5,17 @@
 #include "engine.h"
 #include "photo.h"
 
+#define NUM_ARGS 1
 struct engine *get_engines(char *base_url, int id) {
-    #define num_args_get_engines 1
+    struct url_parameter arguments[NUM_ARGS];
 
-    struct url_parameter arguments[num_args_get_engines];
-
-    char value[11];
-    sprintf(value, "%d", id);
+    char value0[11];
+    sprintf(value0, "%d", id);
     arguments[0].name = "id";
-    arguments[0].value = value;
+    arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    char *result = invoke("get_engines", arguments, (id != 0 ? num_args_get_engines : 0), base_url);
+    char *result = invoke(__FUNCTION__, arguments, (id != 0 ? NUM_ARGS : 0), base_url);
 
     cJSON *json = cJSON_Parse(result);
     int num_results = 0;
@@ -56,30 +55,30 @@ struct engine *get_engines(char *base_url, int id) {
 
     return engines;
 }
+#undef NUM_ARGS
 
+#define NUM_ARGS 3
 int create_engines(char *base_url, struct engine engine)
 {
-    #define num_args_create_engines 3
-
-    struct url_parameter arguments[num_args_create_engines];
+    struct url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "name";
     arguments[0].value = engine.name;
     arguments[0].file = NULL;
 
-    char cylinders[11];
-    sprintf(cylinders, "%d", engine.cylinders);
+    char value1[11];
+    sprintf(value1, "%d", engine.cylinders);
     arguments[1].name = "cylinders";
-    arguments[1].value = cylinders;
+    arguments[1].value = value1;
     arguments[1].file = NULL;
 
-    char throttle_setting[11];
-    sprintf(throttle_setting, "%d", engine.throttle_setting);
-    arguments[2].name = "throttleSetting";
-    arguments[2].value = throttle_setting;
+    char value2[11];
+    sprintf(value2, "%d", engine.throttle_setting);
+    arguments[2].name = "throttle_setting";
+    arguments[2].value = value2;
     arguments[2].file = NULL;
 
-    char *result = invoke("create_engines", arguments, num_args_create_engines, base_url);
+    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
 
     long result_id = strtol(result, (char **) NULL, 10);
 
@@ -87,36 +86,36 @@ int create_engines(char *base_url, struct engine engine)
 
     return result_id;
 }
+#undef NUM_ARGS
 
+#define NUM_ARGS 4
 int create_or_replace_engines(char *base_url, struct engine engine)
 {
-    #define num_args_create_or_replace_engines 4
+    struct url_parameter arguments[NUM_ARGS];
 
-    struct url_parameter arguments[num_args_create_or_replace_engines];
-
-    char id[11];
-    sprintf(id, "%d", engine.id);
+    char value0[11];
+    sprintf(value0, "%d", engine.id);
     arguments[0].name = "id";
-    arguments[0].value = id;
+    arguments[0].value = value0;
     arguments[0].file = NULL;
 
     arguments[1].name = "name";
     arguments[1].value = engine.name;
     arguments[1].file = NULL;
 
-    char cylinders[11];
-    sprintf(cylinders, "%d", engine.cylinders);
+    char value2[11];
+    sprintf(value2, "%d", engine.cylinders);
     arguments[2].name = "cylinders";
-    arguments[2].value = cylinders;
+    arguments[2].value = value2;
     arguments[2].file = NULL;
 
-    char throttle_setting[11];
-    sprintf(throttle_setting, "%d", engine.throttle_setting);
-    arguments[3].name = "throttleSetting";
-    arguments[3].value = throttle_setting;
+    char value3[11];
+    sprintf(value3, "%d", engine.throttle_setting);
+    arguments[3].name = "throttle_setting";
+    arguments[3].value = value3;
     arguments[3].file = NULL;
 
-    char *result = invoke("create_or_replace_engines", arguments, num_args_create_or_replace_engines, base_url);
+    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
 
     long result_id = strtol(result, (char **) NULL, 10);
 
@@ -124,85 +123,100 @@ int create_or_replace_engines(char *base_url, struct engine engine)
 
     return result_id;
 }
+#undef NUM_ARGS
 
+#define NUM_ARGS 4
 void update_engines(char *base_url, struct engine engine)
 {
-    #define num_args_update_engines 4
+    struct url_parameter arguments[NUM_ARGS];
 
-    struct url_parameter arguments[num_args_update_engines];
-
-    char id[11];
-    sprintf(id, "%d", engine.id);
+    char value0[11];
+    sprintf(value0, "%d", engine.id);
     arguments[0].name = "id";
-    arguments[0].value = id;
+    arguments[0].value = value0;
     arguments[0].file = NULL;
 
     arguments[1].name = "name";
     arguments[1].value = engine.name;
     arguments[1].file = NULL;
 
-    char cylinders[11];
-    sprintf(cylinders, "%d", engine.cylinders);
+    char value2[11];
+    sprintf(value2, "%d", engine.cylinders);
     arguments[2].name = "cylinders";
-    arguments[2].value = cylinders;
+    arguments[2].value = value2;
     arguments[2].file = NULL;
 
-    char throttle_setting[11];
-    sprintf(throttle_setting, "%d", engine.throttle_setting);
-    arguments[3].name = "throttleSetting";
-    arguments[3].value = throttle_setting;
+    char value3[11];
+    sprintf(value3, "%d", engine.throttle_setting);
+    arguments[3].name = "throttle_setting";
+    arguments[3].value = value3;
     arguments[3].file = NULL;
 
-    char *result = invoke("update_engines", arguments, num_args_update_engines, base_url);
+    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
     free(result);
 }
+#undef NUM_ARGS
 
+#define NUM_ARGS 1
 void delete_engines(char *base_url, int id)
 {
-    #define num_args_delete_engines 1
+    struct url_parameter arguments[NUM_ARGS];
 
-    struct url_parameter arguments[num_args_delete_engines];
-
-    char id_str[11];
-    sprintf(id_str, "%d", id);
+    char value0[11];
+    sprintf(value0, "%d", id);
     arguments[0].name = "id";
-    arguments[0].value = id_str;
+    arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    char *result = invoke("delete_engines", arguments, num_args_delete_engines, base_url);
+    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
     free(result);
 }
+#undef NUM_ARGS
 
+#define NUM_ARGS 1
 void restart_engines(char *base_url, int id)
 {
-    #define num_args_restart_engines 1
+    struct url_parameter arguments[NUM_ARGS];
 
-    struct url_parameter arguments[num_args_restart_engines];
-
-    char id_str[11];
-    sprintf(id_str, "%d", id);
+    char value0[11];
+    sprintf(value0, "%d", id);
     arguments[0].name = "id";
-    arguments[0].value = id_str;
+    arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    char *result = invoke("restart_engines", arguments, num_args_restart_engines, base_url);
+    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
     free(result);
 }
+#undef NUM_ARGS
 
+#define NUM_ARGS 2
 char *create_photos(char *base_url, struct photo photo)
 {
-    #define num_args_create_photos 2
-
-    struct url_parameter arguments[num_args_create_photos];
+    struct url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "caption";
     arguments[0].value = photo.caption;
     arguments[0].file = NULL;
 
-    arguments[1].name = "photoFile";
+    arguments[1].name = "photo_file";
     arguments[1].value = NULL;
     arguments[1].file = photo.photo_file;
     arguments[1].file_name = photo.photo_file_name;
 
-    return invoke("create_photos", arguments, num_args_create_photos, base_url);
+    return invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
 }
+#undef NUM_ARGS
+
+#define NUM_ARGS 1
+void play_sounds(char *base_url, char *name)
+{
+    struct url_parameter arguments[NUM_ARGS];
+
+    arguments[0].name = "name";
+    arguments[0].value = name;
+    arguments[0].file = NULL;
+
+    char *result = invoke("play_sounds", arguments, NUM_ARGS, base_url);
+    free(result);
+}
+#undef NUM_ARGS

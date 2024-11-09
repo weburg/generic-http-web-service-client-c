@@ -18,4 +18,6 @@ void restart_engines(char *base_url, int id);
 
 char *create_photos(char *base_url, struct photo photo);
 
+void play_sounds(char *base_url, char *name);
+
 #endif //GENERATED_HTTP_WEB_SERVICE_CLIENT_H
