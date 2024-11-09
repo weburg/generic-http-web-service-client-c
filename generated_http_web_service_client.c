@@ -6,7 +6,7 @@
 #include "photo.h"
 
 #define NUM_ARGS 1
-struct engine *get_engines(char *base_url, int id) {
+engine *get_engines(char *base_url, int id) {
     struct url_parameter arguments[NUM_ARGS];
 
     char value0[11];
@@ -26,9 +26,9 @@ struct engine *get_engines(char *base_url, int id) {
         num_results = cJSON_GetArraySize(json);
     }
 
-    struct engine *engines = malloc(sizeof(struct engine) * (num_results + 1));
+    engine *engines = malloc(sizeof(engine) * (num_results + 1));
 
-    struct engine *engines_fill = engines;
+    engine *engines_fill = engines;
 
     if (num_results && cJSON_IsObject(json)) {
         engines_fill->id = cJSON_GetObjectItemCaseSensitive(json, "id")->valueint;
@@ -58,7 +58,7 @@ struct engine *get_engines(char *base_url, int id) {
 #undef NUM_ARGS
 
 #define NUM_ARGS 3
-int create_engines(char *base_url, struct engine engine)
+int create_engines(char *base_url, engine engine)
 {
     struct url_parameter arguments[NUM_ARGS];
 
@@ -89,9 +89,9 @@ int create_engines(char *base_url, struct engine engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int create_or_replace_engines(char *base_url, struct engine engine)
+int create_or_replace_engines(char *base_url, engine engine)
 {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
@@ -126,9 +126,9 @@ int create_or_replace_engines(char *base_url, struct engine engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-void update_engines(char *base_url, struct engine engine)
+void update_engines(char *base_url, engine engine)
 {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
@@ -160,7 +160,7 @@ void update_engines(char *base_url, struct engine engine)
 #define NUM_ARGS 1
 void delete_engines(char *base_url, int id)
 {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -176,7 +176,7 @@ void delete_engines(char *base_url, int id)
 #define NUM_ARGS 1
 void restart_engines(char *base_url, int id)
 {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -190,9 +190,9 @@ void restart_engines(char *base_url, int id)
 #undef NUM_ARGS
 
 #define NUM_ARGS 2
-char *create_photos(char *base_url, struct photo photo)
+char *create_photos(char *base_url, photo photo)
 {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "caption";
     arguments[0].value = photo.caption;
@@ -210,7 +210,7 @@ char *create_photos(char *base_url, struct photo photo)
 #define NUM_ARGS 1
 void play_sounds(char *base_url, char *name)
 {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "name";
     arguments[0].value = name;

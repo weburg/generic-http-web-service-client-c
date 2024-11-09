@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     /*** Photo ***/
 
     // Create
-    struct photo photo = {
+    photo photo = {
             .caption = "Some C generated",
             .photo_file = fopen("../Sealion-e1517614416654.jpg", "rb"),
             .photo_file_name = "Sealion-e1517614416654.jpg"
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     /*** Engine ***/
 
     // Create
-    struct engine engine_create = {
+    engine engine_create = {
             .name = "CengineGenerated",
             .cylinders = 44,
             .throttle_setting = 49
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     int engine_id1 = create_engines(base_url, engine_create);
 
     // CreateOrReplace (which will create)
-    struct engine engine_created_not_replaced = {
+    engine engine_created_not_replaced = {
             .id = -1,
             .name = "CengineCreatedNotReplacedGenerated",
             .cylinders = 45,
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     create_or_replace_engines(base_url, engine_created_not_replaced);
 
     // Prepare for CreateOrReplace
-    struct engine engine_create2 = {
+    engine engine_create2 = {
             .name = "Cengine2Generated",
             .cylinders = 44,
             .throttle_setting = 49
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     int engine_id2 = create_engines(base_url, engine_create2);
 
     // CreateOrReplace (which will replace)
-    struct engine engine_replacement = {
+    engine engine_replacement = {
             .id = engine_id2,
             .name = "CengineReplacement",
             .cylinders = 56,
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     create_or_replace_engines(base_url, engine_replacement);
 
     // Prepare for Update
-    struct engine engine_create3 = {
+    engine engine_create3 = {
             .name = "Cengine3Generated",
             .cylinders = 44,
             .throttle_setting = 49
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     int engine_id3 = create_engines(base_url, engine_create3);
 
     // Update
-    struct engine engine_update = {
+    engine engine_update = {
             .id = engine_id3,
             .name = "Cengine3GeneratedUpdated",
             .cylinders = 44,
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     update_engines(base_url, engine_update);
 
     // Get
-    struct engine *engine = get_engines(base_url, engine_id1);
+    engine *engine = get_engines(base_url, engine_id1);
     printf("Engine returned: %s\n", engine->name);
     free(engine);
 

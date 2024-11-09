@@ -1,11 +1,11 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-struct engine {
+typedef struct engine {
     int id;
     char *name;
     int cylinders;
     int throttle_setting;
-};
+} engine;
 
 #endif //ENGINE_H

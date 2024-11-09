@@ -16,7 +16,6 @@
 ### Example code
 
 ```c
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "generated_http_web_service_client.h"
@@ -27,7 +26,7 @@ char *base_url = "http://localhost:8081/generichttpws";
 int main(int argc, char *argv[])
 {
     // Create
-    struct engine engine_create = {
+    engine engine_create = {
             .name = "CengineGenerated",
             .cylinders = 44,
             .throttle_setting = 49
