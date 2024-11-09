@@ -249,19 +249,23 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
             arguments_copy = arguments;
             for (int i = 0; i < num_args; i++, arguments_copy++) {
                 if (arguments_copy->file == NULL) {
+                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof(char));
                     mime_part = curl_mime_addpart(mime_handle);
-                    curl_mime_name(mime_part, arguments_copy->name);
+                    curl_mime_name(mime_part, _underbar_to_camel(new_name, arguments_copy->name));
                     curl_mime_data(mime_part, arguments_copy->value, CURL_ZERO_TERMINATED);
+                    free(new_name);
                 } else if (arguments_copy->file) {
                     fseek(arguments_copy->file, 0, SEEK_END);
                     long length = ftell(arguments_copy->file);
                     fseek(arguments_copy->file, 0, SEEK_SET);
 
+                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof(char));
                     mime_part = curl_mime_addpart(mime_handle);
-                    curl_mime_name(mime_part, arguments_copy->name);
+                    curl_mime_name(mime_part, _underbar_to_camel(new_name, arguments_copy->name));
                     curl_mime_filename(mime_part, arguments_copy->file_name);
                     curl_mime_data_cb(mime_part, length, (curl_read_callback) fread,
                                       (curl_seek_callback) fseek, NULL, arguments_copy->file);
+                    free(new_name);
                 }
             }
 
