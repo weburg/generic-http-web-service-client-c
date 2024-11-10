@@ -216,7 +216,7 @@ void play_sounds(char *base_url, char *name)
     arguments[0].value = name;
     arguments[0].file = NULL;
 
-    char *result = invoke("play_sounds", arguments, NUM_ARGS, base_url);
+    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
     free(result);
 }
 #undef NUM_ARGS
