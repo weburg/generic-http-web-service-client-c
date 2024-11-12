@@ -7,7 +7,7 @@
 
 #define NUM_ARGS 1
 engine *get_engines(char *base_url, int id) {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -60,7 +60,7 @@ engine *get_engines(char *base_url, int id) {
 #define NUM_ARGS 3
 int create_engines(char *base_url, engine engine)
 {
-    struct url_parameter arguments[NUM_ARGS];
+    url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "name";
     arguments[0].value = engine.name;
@@ -80,7 +80,8 @@ int create_engines(char *base_url, engine engine)
 
     char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
 
-    long result_id = strtol(result, (char **) NULL, 10);
+    cJSON *json = cJSON_Parse(result);
+    int result_id = (int) cJSON_GetNumberValue(json);
 
     free(result);
 
@@ -117,7 +118,8 @@ int create_or_replace_engines(char *base_url, engine engine)
 
     char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, base_url);
 
-    long result_id = strtol(result, (char **) NULL, 10);
+    cJSON *json = cJSON_Parse(result);
+    int result_id = (int) cJSON_GetNumberValue(json);
 
     free(result);
 

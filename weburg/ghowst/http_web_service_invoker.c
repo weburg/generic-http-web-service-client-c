@@ -97,7 +97,7 @@ char *_underbar_to_camel(char *dest, const char *str)
     return dest;
 }
 
-char *_generate_form_data(struct url_parameter *arguments, int num_args)
+char *_generate_form_data(url_parameter *arguments, int num_args)
 {
     CURL *curl_handle = curl_easy_init();
 
@@ -124,7 +124,7 @@ char *_generate_form_data(struct url_parameter *arguments, int num_args)
     return qs;
 }
 
-char *_generate_qs(struct url_parameter *arguments, int num_args)
+char *_generate_qs(url_parameter *arguments, int num_args)
 {
     char *qs = calloc(99, sizeof(char));
 
@@ -151,7 +151,7 @@ char *_generate_mimeqs()
     return qs;
 }
 
-char *invoke(const char *method_name, struct url_parameter *arguments, int num_args, char *base_url)
+char *invoke(const char *method_name, url_parameter *arguments, int num_args, char *base_url)
 {
     char verb[20];
     char entity[128];
@@ -188,7 +188,7 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
     chunk.size = 0; /* no data at this point */
     curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl_handle = curl_easy_init();
-    struct curl_slist *headers = curl_slist_append(NULL, "accept: text/json");
+    struct curl_slist *headers = curl_slist_append(NULL, "accept: application/json");
 
     if (strcmp(verb, "get") == 0) {
         char *query_string = _generate_qs(arguments, num_args);
@@ -216,7 +216,7 @@ char *invoke(const char *method_name, struct url_parameter *arguments, int num_a
         }
     } else if (strcmp(verb, "create") == 0) {
         _Bool has_file = false;
-        struct url_parameter *arguments_copy;
+        url_parameter *arguments_copy;
 
         arguments_copy = arguments;
         for (int i = 0; i < num_args; i++, arguments_copy++) {
