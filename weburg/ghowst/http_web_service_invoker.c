@@ -161,25 +161,25 @@ void _check_error(CURLcode result_code, ghowst_handle *ghowst)
         CURLHcode h;
 
         if (http_status_code >= 400 || http_status_code < 200) {
-            ghowst->last_http_web_service_error.error = TRUE;
+            ghowst->last_http_web_service_error.error = true;
             h = curl_easy_header(ghowst->curl_handle, "x-error-message", 0, CURLH_HEADER, -1, &header);
             if (h == CURLHE_OK) {
                 ghowst->last_http_web_service_error.message = header->value;
             }
         } else if (http_status_code >= 300 && http_status_code < 400) {
-            ghowst->last_http_web_service_error.error = TRUE;
+            ghowst->last_http_web_service_error.error = true;
             h = curl_easy_header(ghowst->curl_handle, "location", 0, CURLH_HEADER, -1, &header);
             if (h == CURLHE_OK) {
                 ghowst->last_http_web_service_error.message = header->value;
             }
         } else {
-            ghowst->last_http_web_service_error.error = FALSE;
+            ghowst->last_http_web_service_error.error = false;
             ghowst->last_http_web_service_error.message = "";
         }
 
         ghowst->last_http_web_service_error.http_status = http_status_code;
     } else {
-        ghowst->last_http_web_service_error.error = TRUE;
+        ghowst->last_http_web_service_error.error = true;
         ghowst->last_http_web_service_error.http_status = 0;
         ghowst->last_http_web_service_error.message = curl_easy_strerror(result_code);
     }
