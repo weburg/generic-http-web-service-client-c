@@ -151,7 +151,41 @@ char *_generate_mimeqs()
     return qs;
 }
 
-char *invoke(const char *method_name, url_parameter *arguments, int num_args, char *base_url)
+void _check_error(CURLcode result_code, ghowst_handle *ghowst)
+{
+    if (result_code == CURLE_OK) {
+        long http_status_code;
+        curl_easy_getinfo(ghowst->curl_handle, CURLINFO_RESPONSE_CODE, &http_status_code);
+
+        struct curl_header *header;
+        CURLHcode h;
+
+        if (http_status_code >= 400 || http_status_code < 200) {
+            ghowst->last_http_web_service_error.error = TRUE;
+            h = curl_easy_header(ghowst->curl_handle, "x-error-message", 0, CURLH_HEADER, -1, &header);
+            if (h == CURLHE_OK) {
+                ghowst->last_http_web_service_error.message = header->value;
+            }
+        } else if (http_status_code >= 300 && http_status_code < 400) {
+            ghowst->last_http_web_service_error.error = TRUE;
+            h = curl_easy_header(ghowst->curl_handle, "location", 0, CURLH_HEADER, -1, &header);
+            if (h == CURLHE_OK) {
+                ghowst->last_http_web_service_error.message = header->value;
+            }
+        } else {
+            ghowst->last_http_web_service_error.error = FALSE;
+            ghowst->last_http_web_service_error.message = "";
+        }
+
+        ghowst->last_http_web_service_error.http_status = http_status_code;
+    } else {
+        ghowst->last_http_web_service_error.error = TRUE;
+        ghowst->last_http_web_service_error.http_status = 0;
+        ghowst->last_http_web_service_error.message = curl_easy_strerror(result_code);
+    }
+}
+
+char *invoke(const char *method_name, url_parameter *arguments, int num_args, ghowst_handle *ghowst)
 {
     char verb[20];
     char entity[128];
@@ -183,37 +217,33 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, ch
     printf("Entity: %s\n", entity);
 
     CURLcode result_code;
+    ghowst->curl_handle = curl_easy_init();
+    struct curl_slist *headers = curl_slist_append(NULL, "accept: application/json");
+
     struct memory_struct chunk;
     chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
     chunk.size = 0; /* no data at this point */
-    curl_global_init(CURL_GLOBAL_ALL);
-    CURL *curl_handle = curl_easy_init();
-    struct curl_slist *headers = curl_slist_append(NULL, "accept: application/json");
 
     if (strcmp(verb, "get") == 0) {
         char *query_string = _generate_qs(arguments, num_args);
 
         char ws_url[300];
-        strncpy(ws_url, base_url, 150);
+        strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
         strncat(ws_url, entity, 50);
         strncat(ws_url, query_string, strlen(query_string));
 
-        curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
 
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
-        result_code = curl_easy_perform(curl_handle);
+        result_code = curl_easy_perform(ghowst->curl_handle);
 
         free(query_string);
 
-        if (result_code == CURLE_OK) { // TODO better error handling
-            //printf("The cURL request was good: %s\n", chunk.memory);
-        } else {
-            printf("The cURL request went to heck\n");
-        }
+        _check_error(result_code, ghowst);
     } else if (strcmp(verb, "create") == 0) {
         _Bool has_file = false;
         url_parameter *arguments_copy;
@@ -227,11 +257,11 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, ch
         }
 
         char ws_url[300];
-        strncpy(ws_url, base_url, 150);
+        strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
         strncat(ws_url, entity, 25);
 
-        curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
 
         curl_mime *mime_handle;
 
@@ -240,10 +270,10 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, ch
         if (!has_file) {
             query_string = _generate_form_data(arguments, num_args);
 
-            curl_easy_setopt(curl_handle, CURLOPT_POST, true);
-            curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, query_string);
+            curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
+            curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
         } else {
-            mime_handle = curl_mime_init(curl_handle);
+            mime_handle = curl_mime_init(ghowst->curl_handle);
             curl_mimepart *mime_part;
 
             arguments_copy = arguments;
@@ -269,25 +299,20 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, ch
                 }
             }
 
-            curl_easy_setopt(curl_handle, CURLOPT_MIMEPOST, mime_handle);
-            //curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+            curl_easy_setopt(ghowst->curl_handle, CURLOPT_MIMEPOST, mime_handle);
         }
 
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
-        result_code = curl_easy_perform(curl_handle);
+        result_code = curl_easy_perform(ghowst->curl_handle);
 
         if (query_string != NULL) {
             free(query_string);
         }
 
-        if (result_code == CURLE_OK) { // TODO better error handling
-            //printf("The cURL request was good: %s\n", chunk.memory);
-        } else {
-            printf("The cURL request went to heck\n");
-        }
+        _check_error(result_code, ghowst);
 
         if (has_file) {
             curl_mime_free(mime_handle);
@@ -303,109 +328,116 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, ch
         char *query_string = _generate_form_data(arguments, num_args);
 
         char ws_url[300];
-        strncpy(ws_url, base_url, 150);
+        strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
         strncat(ws_url, entity, 50);
 
-        curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
-        curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "PUT");
-        curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, query_string);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
-        result_code = curl_easy_perform(curl_handle);
+        result_code = curl_easy_perform(ghowst->curl_handle);
 
         free(query_string);
 
-        if (result_code == CURLE_OK) { // TODO better error handling
-            //printf("The cURL request was good: %s\n", chunk.memory);
-        } else {
-            printf("The cURL request went to heck\n");
-        }
+        _check_error(result_code, ghowst);
     } else if (strcmp(verb, "update") == 0) {
         char *query_string = _generate_form_data(arguments, num_args);
 
         char ws_url[300];
-        strncpy(ws_url, base_url, 150);
+        strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
         strncat(ws_url, entity, 50);
 
-        curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
-        curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
-        curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, query_string);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
-        result_code = curl_easy_perform(curl_handle);
+        result_code = curl_easy_perform(ghowst->curl_handle);
 
         free(query_string);
 
-        if (result_code == CURLE_OK) { // TODO better error handling
-            //printf("The cURL request was good: %s\n", chunk.memory);
-        } else {
-            printf("The cURL request went to heck\n");
-        }
+        _check_error(result_code, ghowst);
     } else if (strcmp(verb, "delete") == 0) {
         char *query_string = _generate_qs(arguments, num_args);
 
         char ws_url[300];
-        strncpy(ws_url, base_url, 150);
+        strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
         strncat(ws_url, entity, 50);
         strncat(ws_url, query_string, strlen(query_string));
 
-        curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
-        curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
-        result_code = curl_easy_perform(curl_handle);
+        result_code = curl_easy_perform(ghowst->curl_handle);
 
         free(query_string);
 
-        if (result_code == CURLE_OK) { // TODO better error handling
-            //printf("The cURL request was good: %s\n", chunk.memory);
-        } else {
-            printf("The cURL request went to heck\n");
-        }
+        _check_error(result_code, ghowst);
     } else {
         char *query_string = _generate_form_data(arguments, num_args);
 
         char ws_url[300];
-        strncpy(ws_url, base_url, 150);
+        strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
         strncat(ws_url, entity, 50);
         strncat(ws_url, "/", 1);
         strncat(ws_url, verb, 50);
 
-        curl_handle = curl_easy_init();
-        curl_easy_setopt(curl_handle, CURLOPT_URL, ws_url);
-        curl_easy_setopt(curl_handle, CURLOPT_POST, true);
-        curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, query_string);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
-        result_code = curl_easy_perform(curl_handle);
+        result_code = curl_easy_perform(ghowst->curl_handle);
 
         free(query_string);
 
-        if (result_code == CURLE_OK) { // TODO better error handling
-            //printf("The cURL request was good: %s\n", chunk.memory);
-        } else {
-            printf("The cURL request went to heck\n");
-        }
+        _check_error(result_code, ghowst);
     }
 
     curl_slist_free_all(headers);
-    curl_easy_cleanup(curl_handle);
-    curl_global_cleanup();
     return chunk.memory;
+}
+
+http_web_service_error ghowst_last_error(ghowst_handle *ghowst)
+{
+    return ghowst->last_http_web_service_error;
+}
+
+void *ghowst_init(char *base_url)
+{
+    ghowst_handle *ghowst = malloc(sizeof(ghowst_handle));
+
+    curl_global_init(CURL_GLOBAL_ALL);
+
+    ghowst->base_url = base_url;
+
+    //ghowst->last_http_web_service_error = malloc(sizeof(http_web_service_error));
+
+    return ghowst;
+}
+
+void ghowst_cleanup(ghowst_handle *ghowst)
+{
+    curl_easy_cleanup(ghowst->curl_handle);
+    curl_global_cleanup();
+
+    free(ghowst);
 }

@@ -21,17 +21,17 @@
 #include "generated_http_web_service_client.h"
 #include "engine.h"
 
-char *base_url = "http://localhost:8081/generichttpws";
-
 int main(int argc, char *argv[])
 {
+    void *ghowst = ghowst_init("http://localhost:8081/generichttpws");
+
     // Create
     engine engine = {
             .name = "CengineGenerated",
             .cylinders = 44,
             .throttle_setting = 49
     };
-    int engine_id1 = create_engines(base_url, engine);
+    int engine_id1 = create_engines(ghowst, engine);
 
     return EXIT_SUCCESS;
 }
