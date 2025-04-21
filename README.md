@@ -19,11 +19,10 @@
 #include <stdlib.h>
 
 #include "generated_http_web_service_client.h"
-#include "engine.h"
 
 int main(int argc, char *argv[])
 {
-    void *ghowst = ghowst_init("http://localhost:8081/generichttpws");
+    GHOWST *ghowst = ghowst_init("http://localhost:8081/generichttpws");
 
     // Create
     engine engine = {

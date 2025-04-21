@@ -6,6 +6,12 @@
 
 #include "http_web_service_invoker.h"
 
+typedef struct ghowst_handle {
+    char *base_url;
+    CURL *curl_handle;
+    ghowst_http_web_service_error last_http_web_service_error;
+} ghowst_handle;
+
 // Begin cURL dependencies
 
 struct memory_struct {
@@ -13,7 +19,7 @@ struct memory_struct {
     size_t size;
 };
 
-static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, void *userp)
+static size_t _write_memory_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
     struct memory_struct *mem = (struct memory_struct *) userp;
@@ -33,7 +39,7 @@ static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, v
 
 // End cURL dependencies
 
-static char *weburg_strlwr(char *dest, const char *str)
+static char *_weburg_strlwr(char *dest, const char *str)
 {
     char *dest_copy = dest;
 
@@ -48,17 +54,17 @@ static char *weburg_strlwr(char *dest, const char *str)
     return dest;
 }
 
-static char *get_entity_name(const char *name, const char *verb)
+static char *_get_entity_name(const char *name, const char *verb)
 {
     char lower_name[128];
-    char *lower_name_ptr = weburg_strlwr(lower_name, name);
+    char *lower_name_ptr = _weburg_strlwr(lower_name, name);
 
     lower_name_ptr += strlen(verb) + 1; // Extra to get rid of trailing underscore
 
     return lower_name_ptr;
 }
 
-static _Bool starts_with(const char *string, const char *prefix)
+static _Bool _starts_with(const char *string, const char *prefix)
 {
     while (*prefix) {
         if (*prefix++ != *string++) {
@@ -69,7 +75,7 @@ static _Bool starts_with(const char *string, const char *prefix)
     return true;
 }
 
-char *_underbar_to_camel(char *dest, const char *str)
+static char *_underbar_to_camel(char *dest, const char *str)
 {
     char *dest_copy = dest;
 
@@ -97,7 +103,7 @@ char *_underbar_to_camel(char *dest, const char *str)
     return dest;
 }
 
-char *_generate_form_data(url_parameter *arguments, int num_args)
+static char *_generate_form_data(ghowst_url_parameter *arguments, int num_args)
 {
     CURL *curl_handle = curl_easy_init();
 
@@ -124,7 +130,7 @@ char *_generate_form_data(url_parameter *arguments, int num_args)
     return qs;
 }
 
-char *_generate_qs(url_parameter *arguments, int num_args)
+static char *_generate_qs(ghowst_url_parameter *arguments, int num_args)
 {
     char *qs = calloc(99, sizeof(char));
 
@@ -141,7 +147,7 @@ char *_generate_qs(url_parameter *arguments, int num_args)
     return qs;
 }
 
-char *_generate_mimeqs()
+static char *_generate_mimeqs()
 {
     // TODO move the file upload field generation code here to support file
     // uploads in other calls.
@@ -151,7 +157,7 @@ char *_generate_mimeqs()
     return qs;
 }
 
-void _check_error(CURLcode result_code, ghowst_handle *ghowst)
+static void _check_error(CURLcode result_code, ghowst_handle *ghowst)
 {
     if (result_code == CURLE_OK) {
         long http_status_code;
@@ -185,32 +191,34 @@ void _check_error(CURLcode result_code, ghowst_handle *ghowst)
     }
 }
 
-char *invoke(const char *method_name, url_parameter *arguments, int num_args, ghowst_handle *ghowst)
+char *ghowst_invoke(const char *method_name, ghowst_url_parameter *arguments, int num_args, GHOWST *ghowsth)
 {
+    ghowst_handle *ghowst = (ghowst_handle *) ghowsth;
+
     char verb[20];
     char entity[128];
 
-    if (starts_with(method_name, "get")) {
+    if (_starts_with(method_name, "get")) {
         strncpy(verb, "get", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
-    } else if (starts_with(method_name, "create_or_replace")) {
+        strncpy(entity, _get_entity_name(method_name, verb), 128);
+    } else if (_starts_with(method_name, "create_or_replace")) {
         strncpy(verb, "create_or_replace", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
-    } else if (starts_with(method_name, "create")) {
+        strncpy(entity, _get_entity_name(method_name, verb), 128);
+    } else if (_starts_with(method_name, "create")) {
         strncpy(verb, "create", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
-    } else if (starts_with(method_name, "update") ) {
+        strncpy(entity, _get_entity_name(method_name, verb), 128);
+    } else if (_starts_with(method_name, "update") ) {
         strncpy(verb, "update", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
-    } else if (starts_with(method_name, "delete")) {
+        strncpy(entity, _get_entity_name(method_name, verb), 128);
+    } else if (_starts_with(method_name, "delete")) {
         strncpy(verb, "delete", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(entity, _get_entity_name(method_name, verb), 128);
     } else {
         char *method_name_to_scan = strdup(method_name);
         char *tokenized_string = strtok(method_name_to_scan, "_");
 
         strncpy(verb, tokenized_string, 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(entity, _get_entity_name(method_name, verb), 128);
     }
 
     printf("Verb: %s\n", verb);
@@ -235,7 +243,7 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
 
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, _write_memory_callback);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
@@ -246,7 +254,7 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
         _check_error(result_code, ghowst);
     } else if (strcmp(verb, "create") == 0) {
         _Bool has_file = false;
-        url_parameter *arguments_copy;
+        ghowst_url_parameter *arguments_copy;
 
         arguments_copy = arguments;
         for (int i = 0; i < num_args; i++, arguments_copy++) {
@@ -302,7 +310,7 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
             curl_easy_setopt(ghowst->curl_handle, CURLOPT_MIMEPOST, mime_handle);
         }
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, _write_memory_callback);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
@@ -336,7 +344,7 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PUT");
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, _write_memory_callback);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
@@ -357,7 +365,7 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, _write_memory_callback);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
@@ -378,7 +386,7 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, _write_memory_callback);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
@@ -401,7 +409,7 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, _write_memory_callback);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
 
@@ -416,8 +424,10 @@ char *invoke(const char *method_name, url_parameter *arguments, int num_args, gh
     return chunk.memory;
 }
 
-http_web_service_error ghowst_last_error(ghowst_handle *ghowst)
+ghowst_http_web_service_error ghowst_last_error(GHOWST *ghowsth)
 {
+    ghowst_handle *ghowst = (ghowst_handle *) ghowsth;
+
     return ghowst->last_http_web_service_error;
 }
 
@@ -429,13 +439,13 @@ void *ghowst_init(char *base_url)
 
     ghowst->base_url = base_url;
 
-    //ghowst->last_http_web_service_error = malloc(sizeof(http_web_service_error));
-
     return ghowst;
 }
 
-void ghowst_cleanup(ghowst_handle *ghowst)
+void ghowst_cleanup(GHOWST *ghowsth)
 {
+    ghowst_handle *ghowst = (ghowst_handle *) ghowsth;
+
     curl_easy_cleanup(ghowst->curl_handle);
     curl_global_cleanup();
 

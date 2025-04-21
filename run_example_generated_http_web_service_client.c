@@ -2,13 +2,10 @@
 #include <stdlib.h>
 
 #include "generated_http_web_service_client.h"
-#include "engine.h"
-#include "photo.h"
-#include "truck.h"
 
 int main(int argc, char *argv[])
 {
-    void *ghowst = ghowst_init("http://localhost:8081/generichttpws");
+    GHOWST *ghowst = ghowst_init("http://localhost:8081/generichttpws");
 
     /*** Photo ***/
 
@@ -122,18 +119,18 @@ int main(int argc, char *argv[])
     // Induce a not found error and catch it
 
     struct engine *engine_2 = get_engines(ghowst, -2);
-    http_web_service_error error = ghowst_last_error(ghowst);
+    ghowst_http_web_service_error error = ghowst_last_error(ghowst);
     if (!error.error) {
         printf("Engine returned: %s\n", engine_2->name);
     } else {
         printf("Status: %ld Message: %s\n", error.http_status, error.message);
     }
 
-    void *ghowst_fail = ghowst_init("http://nohost:8081/generichttpws");
+    GHOWST *ghowst_fail = ghowst_init("http://nohost:8081/generichttpws");
 
     // Induce a service error and catch it
     get_engines(ghowst_fail, -2);
-    http_web_service_error error2 = ghowst_last_error(ghowst_fail);
+    ghowst_http_web_service_error error2 = ghowst_last_error(ghowst_fail);
     if (error2.error) {
         printf("Status: %ld Message: %s\n", error2.http_status, error2.message);
     }

@@ -7,9 +7,9 @@
 #include "truck.h"
 
 #define NUM_ARGS 1
-engine *get_engines(ghowst_handle *ghowst, int id)
+engine *get_engines(GHOWST *ghowst, int id)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -17,7 +17,7 @@ engine *get_engines(ghowst_handle *ghowst, int id)
     arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, (id != 0 ? NUM_ARGS : 0), ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, (id != 0 ? NUM_ARGS : 0), ghowst);
 
     cJSON *json = cJSON_Parse(result);
     int num_results = 0;
@@ -60,9 +60,9 @@ engine *get_engines(ghowst_handle *ghowst, int id)
 #undef NUM_ARGS
 
 #define NUM_ARGS 3
-int create_engines(ghowst_handle *ghowst, engine engine)
+int create_engines(GHOWST *ghowst, engine engine)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "name";
     arguments[0].value = engine.name;
@@ -80,7 +80,7 @@ int create_engines(ghowst_handle *ghowst, engine engine)
     arguments[2].value = value2;
     arguments[2].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
 
     cJSON *json = cJSON_Parse(result);
     int result_id = (int) cJSON_GetNumberValue(json);
@@ -92,9 +92,9 @@ int create_engines(ghowst_handle *ghowst, engine engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int create_or_replace_engines(ghowst_handle *ghowst, engine engine)
+int create_or_replace_engines(GHOWST *ghowst, engine engine)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
@@ -118,7 +118,7 @@ int create_or_replace_engines(ghowst_handle *ghowst, engine engine)
     arguments[3].value = value3;
     arguments[3].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
 
     cJSON *json = cJSON_Parse(result);
     int result_id = (int) cJSON_GetNumberValue(json);
@@ -130,9 +130,9 @@ int create_or_replace_engines(ghowst_handle *ghowst, engine engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-void update_engines(ghowst_handle *ghowst, engine engine)
+void update_engines(GHOWST *ghowst, engine engine)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
@@ -156,15 +156,15 @@ void update_engines(ghowst_handle *ghowst, engine engine)
     arguments[3].value = value3;
     arguments[3].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
     free(result);
 }
 #undef NUM_ARGS
 
 #define NUM_ARGS 1
-void delete_engines(ghowst_handle *ghowst, int id)
+void delete_engines(GHOWST *ghowst, int id)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -172,15 +172,15 @@ void delete_engines(ghowst_handle *ghowst, int id)
     arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
     free(result);
 }
 #undef NUM_ARGS
 
 #define NUM_ARGS 1
-void restart_engines(ghowst_handle *ghowst, int id)
+void restart_engines(GHOWST *ghowst, int id)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -188,15 +188,15 @@ void restart_engines(ghowst_handle *ghowst, int id)
     arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
     free(result);
 }
 #undef NUM_ARGS
 
 #define NUM_ARGS 2
-char *create_photos(ghowst_handle *ghowst, photo photo)
+char *create_photos(GHOWST *ghowst, photo photo)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "caption";
     arguments[0].value = photo.caption;
@@ -207,28 +207,28 @@ char *create_photos(ghowst_handle *ghowst, photo photo)
     arguments[1].file = photo.photo_file;
     arguments[1].file_name = photo.name;
 
-    return invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    return ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
 }
 #undef NUM_ARGS
 
 #define NUM_ARGS 1
-void play_sounds(ghowst_handle *ghowst, char *name)
+void play_sounds(GHOWST *ghowst, char *name)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     arguments[0].name = "name";
     arguments[0].value = name;
     arguments[0].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
     free(result);
 }
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int race_trucks(ghowst_handle *ghowst, truck truck1, truck truck2)
+int race_trucks(GHOWST *ghowst, truck truck1, truck truck2)
 {
-    url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", truck1.engine_id);
@@ -250,7 +250,7 @@ int race_trucks(ghowst_handle *ghowst, truck truck1, truck truck2)
     arguments[3].value = truck2.name;
     arguments[3].file = NULL;
 
-    char *result = invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
+    char *result = ghowst_invoke(__FUNCTION__, arguments, NUM_ARGS, ghowst);
 
     cJSON *json = cJSON_Parse(result);
     int result_id = (int) cJSON_GetNumberValue(json);
