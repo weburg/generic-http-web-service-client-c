@@ -64,19 +64,19 @@ int create_engines(GHOWST *ghowst, engine engine)
 {
     ghowst_url_parameter arguments[NUM_ARGS];
 
-    arguments[0].name = "name";
+    arguments[0].name = "engine.name";
     arguments[0].value = engine.name;
     arguments[0].file = NULL;
 
     char value1[11];
     sprintf(value1, "%d", engine.cylinders);
-    arguments[1].name = "cylinders";
+    arguments[1].name = "engine.cylinders";
     arguments[1].value = value1;
     arguments[1].file = NULL;
 
     char value2[11];
     sprintf(value2, "%d", engine.throttle_setting);
-    arguments[2].name = "throttle_setting";
+    arguments[2].name = "engine.throttle_setting";
     arguments[2].value = value2;
     arguments[2].file = NULL;
 
@@ -98,23 +98,23 @@ int create_or_replace_engines(GHOWST *ghowst, engine engine)
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
-    arguments[0].name = "id";
+    arguments[0].name = "engine.id";
     arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    arguments[1].name = "name";
+    arguments[1].name = "engine.name";
     arguments[1].value = engine.name;
     arguments[1].file = NULL;
 
     char value2[11];
     sprintf(value2, "%d", engine.cylinders);
-    arguments[2].name = "cylinders";
+    arguments[2].name = "engine.cylinders";
     arguments[2].value = value2;
     arguments[2].file = NULL;
 
     char value3[11];
     sprintf(value3, "%d", engine.throttle_setting);
-    arguments[3].name = "throttle_setting";
+    arguments[3].name = "engine.throttle_setting";
     arguments[3].value = value3;
     arguments[3].file = NULL;
 
@@ -136,23 +136,23 @@ void update_engines(GHOWST *ghowst, engine engine)
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
-    arguments[0].name = "id";
+    arguments[0].name = "engine.id";
     arguments[0].value = value0;
     arguments[0].file = NULL;
 
-    arguments[1].name = "name";
+    arguments[1].name = "engine.name";
     arguments[1].value = engine.name;
     arguments[1].file = NULL;
 
     char value2[11];
     sprintf(value2, "%d", engine.cylinders);
-    arguments[2].name = "cylinders";
+    arguments[2].name = "engine.cylinders";
     arguments[2].value = value2;
     arguments[2].file = NULL;
 
     char value3[11];
     sprintf(value3, "%d", engine.throttle_setting);
-    arguments[3].name = "throttle_setting";
+    arguments[3].name = "engine.throttle_setting";
     arguments[3].value = value3;
     arguments[3].file = NULL;
 
@@ -198,11 +198,11 @@ char *create_photos(GHOWST *ghowst, photo photo)
 {
     ghowst_url_parameter arguments[NUM_ARGS];
 
-    arguments[0].name = "caption";
+    arguments[0].name = "photo.caption";
     arguments[0].value = photo.caption;
     arguments[0].file = NULL;
 
-    arguments[1].name = "photo_file";
+    arguments[1].name = "photo.photo_file";
     arguments[1].value = NULL;
     arguments[1].file = photo.photo_file;
     arguments[1].file_name = photo.name;
