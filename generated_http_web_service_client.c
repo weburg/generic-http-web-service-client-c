@@ -1,10 +1,7 @@
 #include <cjson/cJSON.h>
-#include <stdlib.h>
 
 #include "weburg/ghowst/http_web_service_invoker.h"
-#include "engine.h"
-#include "photo.h"
-#include "truck.h"
+#include "generated_http_web_service_client.h"
 
 #define NUM_ARGS 1
 engine *get_engines(GHOWST *ghowst, int id)

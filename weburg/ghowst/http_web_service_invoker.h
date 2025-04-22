@@ -1,8 +1,9 @@
 #ifndef HTTP_WEB_SERVICE_INVOKER_H
 #define HTTP_WEB_SERVICE_INVOKER_H
 
-#include "curl/curl.h"
 #include <stdio.h>
+
+#include "curl/curl.h"
 
 typedef void GHOWST;
 
