@@ -431,7 +431,7 @@ ghowst_http_web_service_error ghowst_last_error(GHOWST *ghowsth)
     return ghowst->last_http_web_service_error;
 }
 
-void *ghowst_init(char *base_url)
+GHOWST *ghowst_init(char *base_url)
 {
     ghowst_handle *ghowst = malloc(sizeof *ghowst);
 

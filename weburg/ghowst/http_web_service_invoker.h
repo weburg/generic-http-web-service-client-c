@@ -28,7 +28,7 @@ char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_paramet
 
 ghowst_http_web_service_error ghowst_last_error(GHOWST *ghowsth);
 
-void *ghowst_init(char *base_url);
+GHOWST *ghowst_init(char *base_url);
 
 void ghowst_cleanup(GHOWST *ghowsth);
 
