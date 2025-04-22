@@ -107,7 +107,7 @@ static char *generate_form_data(ghowst_url_parameter *arguments, int num_args)
 {
     CURL *curl_handle = curl_easy_init();
 
-    char *qs = calloc((128 * num_args) + 1, sizeof(char));
+    char *qs = calloc((128 * num_args) + 1, sizeof *qs);
 
     for (int i = 0; i < num_args; i++, arguments++) {
         char *escaped_value = curl_easy_escape(curl_handle, arguments->value, strlen(arguments->value));
@@ -116,7 +116,7 @@ static char *generate_form_data(ghowst_url_parameter *arguments, int num_args)
             strncat(qs, "&", 1);
         }
 
-        char *new_name = calloc(strlen(arguments->name) + 1, sizeof(char));
+        char *new_name = calloc(strlen(arguments->name) + 1, sizeof *new_name);
         strncat(qs, underbar_to_camel(new_name, arguments->name), strlen(arguments->name));
         strncat(qs, "=", 1);
         strncat(qs, escaped_value, strlen(escaped_value));
@@ -132,7 +132,7 @@ static char *generate_form_data(ghowst_url_parameter *arguments, int num_args)
 
 static char *generate_qs(ghowst_url_parameter *arguments, int num_args)
 {
-    char *qs = calloc(99, sizeof(char));
+    char *qs = calloc(99, sizeof *qs);
 
     if (num_args > 0) {
         strncat(qs, "?", 1);
@@ -287,7 +287,7 @@ char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_paramet
             arguments_copy = arguments;
             for (int i = 0; i < num_args; i++, arguments_copy++) {
                 if (arguments_copy->file == NULL) {
-                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof(char));
+                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof *new_name);
                     mime_part = curl_mime_addpart(mime_handle);
                     curl_mime_name(mime_part, underbar_to_camel(new_name, arguments_copy->name));
                     curl_mime_data(mime_part, arguments_copy->value, CURL_ZERO_TERMINATED);
@@ -297,7 +297,7 @@ char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_paramet
                     long length = ftell(arguments_copy->file);
                     fseek(arguments_copy->file, 0, SEEK_SET);
 
-                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof(char));
+                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof *new_name);
                     mime_part = curl_mime_addpart(mime_handle);
                     curl_mime_name(mime_part, underbar_to_camel(new_name, arguments_copy->name));
                     curl_mime_filename(mime_part, arguments_copy->file_name);
@@ -433,7 +433,7 @@ ghowst_http_web_service_error ghowst_last_error(GHOWST *ghowsth)
 
 void *ghowst_init(char *base_url)
 {
-    ghowst_handle *ghowst = malloc(sizeof(ghowst_handle));
+    ghowst_handle *ghowst = malloc(sizeof *ghowst);
 
     curl_global_init(CURL_GLOBAL_ALL);
 

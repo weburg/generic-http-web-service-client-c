@@ -25,7 +25,7 @@ engine *get_engines(GHOWST *ghowst, int id)
         num_results = cJSON_GetArraySize(json);
     }
 
-    engine *engines = malloc(sizeof(engine) * (num_results + 1));
+    engine *engines = malloc(sizeof *engines * (num_results + 1));
 
     engine *engines_fill = engines;
 
