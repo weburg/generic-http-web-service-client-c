@@ -23,7 +23,7 @@ typedef struct ghowst_url_parameter {
     char *file_name;
 } ghowst_url_parameter;
 
-char *ghowst_invoke(const char *method_name, ghowst_url_parameter *arguments, int num_args, GHOWST *ghowsth);
+char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_parameter *arguments, int num_args);
 
 ghowst_http_web_service_error ghowst_last_error(GHOWST *ghowsth);
 

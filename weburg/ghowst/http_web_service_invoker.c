@@ -191,7 +191,7 @@ static void _check_error(CURLcode result_code, ghowst_handle *ghowst)
     }
 }
 
-char *ghowst_invoke(const char *method_name, ghowst_url_parameter *arguments, int num_args, GHOWST *ghowsth)
+char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_parameter *arguments, int num_args)
 {
     ghowst_handle *ghowst = (ghowst_handle *) ghowsth;
 
