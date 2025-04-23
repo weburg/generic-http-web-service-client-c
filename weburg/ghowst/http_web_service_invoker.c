@@ -6,11 +6,11 @@
 
 #include "http_web_service_invoker.h"
 
-typedef struct ghowst_handle {
+typedef struct ghowsthandle {
     char *base_url;
     CURL *curl_handle;
-    ghowst_http_web_service_error last_http_web_service_error;
-} ghowst_handle;
+    ghowsthttp_web_service_error last_http_web_service_error;
+} ghowsthandle;
 
 // Begin cURL dependencies
 
@@ -157,7 +157,7 @@ static char *generate_mimeqs()
     return qs;
 }
 
-static void check_error(CURLcode result_code, ghowst_handle *ghowst)
+static void check_error(CURLcode result_code, ghowsthandle *ghowst)
 {
     if (result_code == CURLE_OK) {
         long http_status_code;
@@ -191,9 +191,9 @@ static void check_error(CURLcode result_code, ghowst_handle *ghowst)
     }
 }
 
-char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_parameter *arguments, int num_args)
+char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parameter *arguments, int num_args)
 {
-    ghowst_handle *ghowst = (ghowst_handle *) ghowsth;
+    ghowsthandle *ghowst = (ghowsthandle *) ghowsth;
 
     char verb[20];
     char entity[128];
@@ -424,16 +424,16 @@ char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_paramet
     return chunk.memory;
 }
 
-ghowst_http_web_service_error ghowst_last_error(GHOWST *ghowsth)
+ghowsthttp_web_service_error ghowst_last_error(ghowsth *ghowsth)
 {
-    ghowst_handle *ghowst = (ghowst_handle *) ghowsth;
+    ghowsthandle *ghowst = (ghowsthandle *) ghowsth;
 
     return ghowst->last_http_web_service_error;
 }
 
-GHOWST *ghowst_init(char *base_url)
+ghowsth *ghowst_init(char *base_url)
 {
-    ghowst_handle *ghowst = malloc(sizeof *ghowst);
+    ghowsthandle *ghowst = malloc(sizeof *ghowst);
 
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -442,9 +442,9 @@ GHOWST *ghowst_init(char *base_url)
     return ghowst;
 }
 
-void ghowst_cleanup(GHOWST *ghowsth)
+void ghowst_cleanup(ghowsth *ghowsth)
 {
-    ghowst_handle *ghowst = (ghowst_handle *) ghowsth;
+    ghowsthandle *ghowst = (ghowsthandle *) ghowsth;
 
     curl_easy_cleanup(ghowst->curl_handle);
     curl_global_cleanup();

@@ -22,7 +22,7 @@
 
 int main(int argc, char *argv[])
 {
-    GHOWST *ghowst = ghowst_init("http://localhost:8081/generichttpws");
+    ghowsth *ghowst = ghowst_init("http://localhost:8081/generichttpws");
 
     // Create
     engine engine = {

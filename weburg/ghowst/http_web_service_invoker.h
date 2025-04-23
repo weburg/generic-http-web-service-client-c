@@ -5,13 +5,13 @@
 
 #include "curl/curl.h"
 
-typedef void GHOWST;
+typedef void ghowsth;
 
-typedef struct ghowst_http_web_service_error {
+typedef struct ghowsthttp_web_service_error {
     _Bool error; // Will be false for all successful calls
     long http_status; // If there is an error, this will contain the HTTP status
     char *message; // If there is an error, this will contain the server message
-} ghowst_http_web_service_error;
+} ghowsthttp_web_service_error;
 
 typedef struct ghowst_url_parameter {
     char *name;
@@ -24,12 +24,12 @@ typedef struct ghowst_url_parameter {
     char *file_name;
 } ghowst_url_parameter;
 
-char *ghowst_invoke(GHOWST *ghowsth, const char *method_name, ghowst_url_parameter *arguments, int num_args);
+char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parameter *arguments, int num_args);
 
-ghowst_http_web_service_error ghowst_last_error(GHOWST *ghowsth);
+ghowsthttp_web_service_error ghowst_last_error(ghowsth *ghowsth);
 
-GHOWST *ghowst_init(char *base_url);
+ghowsth *ghowst_init(char *base_url);
 
-void ghowst_cleanup(GHOWST *ghowsth);
+void ghowst_cleanup(ghowsth *ghowsth);
 
 #endif //HTTP_WEB_SERVICE_INVOKER_H
