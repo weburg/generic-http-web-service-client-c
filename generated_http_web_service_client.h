@@ -7,30 +7,30 @@
 #include "sound.h"
 #include "truck.h"
 
-engine_t *get_engines(ghowsth *ghowst, int id);
+engine_t *get_engines(ghowsth ghowst, int id);
 
-int create_engines(ghowsth *ghowst, engine_t engine);
+int create_engines(ghowsth ghowst, engine_t engine);
 
-int create_or_replace_engines(ghowsth *ghowst, engine_t engine);
+int create_or_replace_engines(ghowsth ghowst, engine_t engine);
 
-void update_engines(ghowsth *ghowst, engine_t engine);
+void update_engines(ghowsth ghowst, engine_t engine);
 
-void delete_engines(ghowsth *ghowst, int id);
+void delete_engines(ghowsth ghowst, int id);
 
-void restart_engines(ghowsth *ghowst, int id);
+void restart_engines(ghowsth ghowst, int id);
 
 void stop_engines(int id);
 
 photo_t *get_photos(char *name);
 
-char *create_photos(ghowsth *ghowst, photo_t photo);
+char *create_photos(ghowsth ghowst, photo_t photo);
 
 sound_t *get_sounds(char *name);
 
 char *create_sounds(sound_t sound);
 
-void play_sounds(ghowsth *ghowst, char *name);
+void play_sounds(ghowsth ghowst, char *name);
 
-int race_trucks(ghowsth *ghowst, truck_t truck1, truck_t truck2);
+int race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2);
 
 #endif //GENERATED_HTTP_WEB_SERVICE_CLIENT_H

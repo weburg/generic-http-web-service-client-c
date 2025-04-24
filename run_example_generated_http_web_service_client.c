@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-    ghowsth *ghowst = ghowst_init("http://localhost:8081/generichttpws");
+    ghowsth ghowst = ghowst_init("http://localhost:8081/generichttpws");
 
     /*** Photo ***/
 
@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
             .cylinders = 45,
             .throttle_setting = 50
     };
+
     create_or_replace_engines(ghowst, engine_created_not_replaced);
 
     // Prepare for CreateOrReplace
@@ -126,7 +127,7 @@ int main(int argc, char *argv[])
         printf("Status: %ld Message: %s\n", error.http_status, error.message);
     }
 
-    ghowsth *ghowst_fail = ghowst_init("http://nohost:8081/generichttpws");
+    ghowsth ghowst_fail = ghowst_init("http://nohost:8081/generichttpws");
 
     // Induce a service error and catch it
     get_engines(ghowst_fail, -2);

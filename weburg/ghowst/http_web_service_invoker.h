@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-typedef void ghowsth;
+typedef struct ghowsthandle_t *ghowsth;
 
 typedef struct ghowsthttp_web_service_error {
     _Bool error; // Will be false for all successful calls
@@ -22,12 +22,12 @@ typedef struct ghowst_url_parameter {
     char *file_name;
 } ghowst_url_parameter_t;
 
-char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parameter_t *arguments, int num_args);
+char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_parameter_t *arguments, int num_args);
 
-ghowsthttp_web_service_error_t ghowst_last_error(ghowsth *ghowsth);
+ghowsthttp_web_service_error_t ghowst_last_error(ghowsth ghowsth);
 
-ghowsth *ghowst_init(char *base_url);
+ghowsth ghowst_init(char *base_url);
 
-void ghowst_cleanup(ghowsth *ghowsth);
+void ghowst_cleanup(ghowsth ghowsth);
 
 #endif //HTTP_WEB_SERVICE_INVOKER_H

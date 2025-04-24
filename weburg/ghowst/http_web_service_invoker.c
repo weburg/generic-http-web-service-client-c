@@ -191,7 +191,7 @@ static void check_error(CURLcode result_code, ghowsthandle_t *ghowst)
     }
 }
 
-char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parameter_t *arguments, int num_args)
+char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_parameter_t *arguments, int num_args)
 {
     ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
 
@@ -424,14 +424,14 @@ char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parame
     return chunk.memory;
 }
 
-ghowsthttp_web_service_error_t ghowst_last_error(ghowsth *ghowsth)
+ghowsthttp_web_service_error_t ghowst_last_error(ghowsth ghowsth)
 {
     ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
 
     return ghowst->last_http_web_service_error;
 }
 
-ghowsth *ghowst_init(char *base_url)
+ghowsth ghowst_init(char *base_url)
 {
     ghowsthandle_t *ghowst = malloc(sizeof *ghowst);
 
@@ -442,7 +442,7 @@ ghowsth *ghowst_init(char *base_url)
     return ghowst;
 }
 
-void ghowst_cleanup(ghowsth *ghowsth)
+void ghowst_cleanup(ghowsth ghowsth)
 {
     ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
 

@@ -5,7 +5,7 @@
 #include "generated_http_web_service_client.h"
 
 #define NUM_ARGS 1
-engine_t *get_engines(ghowsth *ghowst, int id)
+engine_t *get_engines(ghowsth ghowst, int id)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -58,7 +58,7 @@ engine_t *get_engines(ghowsth *ghowst, int id)
 #undef NUM_ARGS
 
 #define NUM_ARGS 3
-int create_engines(ghowsth *ghowst, engine_t engine)
+int create_engines(ghowsth ghowst, engine_t engine)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -90,7 +90,7 @@ int create_engines(ghowsth *ghowst, engine_t engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int create_or_replace_engines(ghowsth *ghowst, engine_t engine)
+int create_or_replace_engines(ghowsth ghowst, engine_t engine)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -128,7 +128,7 @@ int create_or_replace_engines(ghowsth *ghowst, engine_t engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-void update_engines(ghowsth *ghowst, engine_t engine)
+void update_engines(ghowsth ghowst, engine_t engine)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -160,7 +160,7 @@ void update_engines(ghowsth *ghowst, engine_t engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 1
-void delete_engines(ghowsth *ghowst, int id)
+void delete_engines(ghowsth ghowst, int id)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -176,7 +176,7 @@ void delete_engines(ghowsth *ghowst, int id)
 #undef NUM_ARGS
 
 #define NUM_ARGS 1
-void restart_engines(ghowsth *ghowst, int id)
+void restart_engines(ghowsth ghowst, int id)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -192,7 +192,7 @@ void restart_engines(ghowsth *ghowst, int id)
 #undef NUM_ARGS
 
 #define NUM_ARGS 2
-char *create_photos(ghowsth *ghowst, photo_t photo)
+char *create_photos(ghowsth ghowst, photo_t photo)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -210,7 +210,7 @@ char *create_photos(ghowsth *ghowst, photo_t photo)
 #undef NUM_ARGS
 
 #define NUM_ARGS 1
-void play_sounds(ghowsth *ghowst, char *name)
+void play_sounds(ghowsth ghowst, char *name)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -224,7 +224,7 @@ void play_sounds(ghowsth *ghowst, char *name)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int race_trucks(ghowsth *ghowst, truck_t truck1, truck_t truck2)
+int race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
