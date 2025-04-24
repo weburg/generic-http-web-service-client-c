@@ -6,11 +6,11 @@
 
 #include "http_web_service_invoker.h"
 
-typedef struct ghowsthandle {
+typedef struct ghowst_handle {
     char *base_url;
     CURL *curl_handle;
     ghowsthttp_web_service_error_t last_http_web_service_error;
-} ghowsthandle_t;
+} ghowst_handle_t;
 
 // Begin cURL dependencies
 
@@ -157,7 +157,7 @@ static char *generate_mimeqs()
     return qs;
 }
 
-static void check_error(CURLcode result_code, ghowsthandle_t *ghowst)
+static void check_error(CURLcode result_code, ghowst_handle_t *ghowst)
 {
     if (result_code == CURLE_OK) {
         long http_status_code;
@@ -193,7 +193,7 @@ static void check_error(CURLcode result_code, ghowsthandle_t *ghowst)
 
 char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_parameter_t *arguments, int num_args)
 {
-    ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
+    ghowst_handle_t *ghowst = (ghowst_handle_t *) ghowsth;
 
     char verb[20];
     char entity[128];
@@ -426,25 +426,25 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
 
 ghowsthttp_web_service_error_t ghowst_last_error(ghowsth ghowsth)
 {
-    ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
+    ghowst_handle_t *ghowst = (ghowst_handle_t *) ghowsth;
 
     return ghowst->last_http_web_service_error;
 }
 
 ghowsth ghowst_init(char *base_url)
 {
-    ghowsthandle_t *ghowst = malloc(sizeof *ghowst);
+    ghowst_handle_t *ghowst = malloc(sizeof *ghowst);
 
     curl_global_init(CURL_GLOBAL_ALL);
 
     ghowst->base_url = base_url;
 
-    return ghowst;
+    return (ghowsth) ghowst;
 }
 
 void ghowst_cleanup(ghowsth ghowsth)
 {
-    ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
+    ghowst_handle_t *ghowst = (ghowst_handle_t *) ghowsth;
 
     curl_easy_cleanup(ghowst->curl_handle);
     curl_global_cleanup();

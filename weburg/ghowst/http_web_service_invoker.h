@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-typedef struct ghowsthandle_t *ghowsth;
+typedef struct ghowst_handle_t *ghowsth;
 
 typedef struct ghowsthttp_web_service_error {
     _Bool error; // Will be false for all successful calls
