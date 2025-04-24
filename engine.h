@@ -6,6 +6,6 @@ typedef struct engine {
     char *name;
     int cylinders;
     int throttle_setting;
-} engine;
+} engine_t;
 
 #endif //ENGINE_H

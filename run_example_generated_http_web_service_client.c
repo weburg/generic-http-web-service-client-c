@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "generated_http_web_service_client.h"
 
@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     /*** Photo ***/
 
     // Create
-    photo photo = {
+    photo_t photo = {
             .name = "Sealion-e1517614416654.jpg",
             .caption = "Some C generated",
             .photo_file = fopen("../Sealion-e1517614416654.jpg", "rb")
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     /*** Engine ***/
 
     // Create
-    engine engine_create = {
+    engine_t engine_create = {
             .name = "CengineGenerated",
             .cylinders = 44,
             .throttle_setting = 49
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     int engine_id1 = create_engines(ghowst, engine_create);
 
     // CreateOrReplace (which will create)
-    engine engine_created_not_replaced = {
+    engine_t engine_created_not_replaced = {
             .id = -1,
             .name = "CengineCreatedNotReplacedGenerated",
             .cylinders = 45,
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     create_or_replace_engines(ghowst, engine_created_not_replaced);
 
     // Prepare for CreateOrReplace
-    engine engine_create2 = {
+    engine_t engine_create2 = {
             .name = "Cengine2Generated",
             .cylinders = 44,
             .throttle_setting = 49
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     int engine_id2 = create_engines(ghowst, engine_create2);
 
     // CreateOrReplace (which will replace)
-    engine engine_replacement = {
+    engine_t engine_replacement = {
             .id = engine_id2,
             .name = "CengineReplacement",
             .cylinders = 56,
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     create_or_replace_engines(ghowst, engine_replacement);
 
     // Prepare for Update
-    engine engine_create3 = {
+    engine_t engine_create3 = {
             .name = "Cengine3Generated",
             .cylinders = 44,
             .throttle_setting = 49
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     int engine_id3 = create_engines(ghowst, engine_create3);
 
     // Update
-    engine engine_update = {
+    engine_t engine_update = {
             .id = engine_id3,
             .name = "Cengine3GeneratedUpdated",
             .cylinders = 44,
@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
     update_engines(ghowst, engine_update);
 
     // Get
-    engine *engine = get_engines(ghowst, engine_id1);
+    engine_t *engine = get_engines(ghowst, engine_id1);
     printf("Engine returned: %s\n", engine->name);
     free(engine);
 
     // Get all
-    struct engine *engines = get_engines(ghowst, 0);
-    struct engine *engines_copy = engines;
+    engine_t *engines = get_engines(ghowst, 0);
+    engine_t *engines_copy = engines;
 
     int count = 0;
     for (; engines_copy->id != '\0'; engines_copy++, count++);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     free(engines);
 
     // Prepare for delete
-    struct engine engine_to_delete = {
+    engine_t engine_to_delete = {
             .name = "CengineToDelete",
             .cylinders = 89,
             .throttle_setting = 70
@@ -102,11 +102,11 @@ int main(int argc, char *argv[])
 
     // Repeat, complex objects with different names
 
-    struct truck truck1 = {
+    truck_t truck1 = {
             .name = "Ram",
             .engine_id = engine_id1
     };
-    struct truck truck2 = {
+    truck_t truck2 = {
             .name = "Ford",
             .engine_id = engine_id2
     };
@@ -118,8 +118,8 @@ int main(int argc, char *argv[])
 
     // Induce a not found error and catch it
 
-    struct engine *engine_2 = get_engines(ghowst, -2);
-    ghowsthttp_web_service_error error = ghowst_last_error(ghowst);
+    engine_t *engine_2 = get_engines(ghowst, -2);
+    ghowsthttp_web_service_error_t error = ghowst_last_error(ghowst);
     if (!error.error) {
         printf("Engine returned: %s\n", engine_2->name);
     } else {
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
     // Induce a service error and catch it
     get_engines(ghowst_fail, -2);
-    ghowsthttp_web_service_error error2 = ghowst_last_error(ghowst_fail);
+    ghowsthttp_web_service_error_t error2 = ghowst_last_error(ghowst_fail);
     if (error2.error) {
         printf("Status: %ld Message: %s\n", error2.http_status, error2.message);
     }

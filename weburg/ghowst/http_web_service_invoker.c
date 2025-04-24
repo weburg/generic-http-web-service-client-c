@@ -1,6 +1,6 @@
+#include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
 
@@ -9,12 +9,12 @@
 typedef struct ghowsthandle {
     char *base_url;
     CURL *curl_handle;
-    ghowsthttp_web_service_error last_http_web_service_error;
-} ghowsthandle;
+    ghowsthttp_web_service_error_t last_http_web_service_error;
+} ghowsthandle_t;
 
 // Begin cURL dependencies
 
-struct memory_struct {
+struct memory {
     char *memory;
     size_t size;
 };
@@ -22,7 +22,7 @@ struct memory_struct {
 static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
-    struct memory_struct *mem = (struct memory_struct *) userp;
+    struct memory *mem = (struct memory *) userp;
     mem->memory = realloc(mem->memory, mem->size + realsize + 1);
     if(mem->memory == NULL) {
         /* out of memory! */
@@ -103,7 +103,7 @@ static char *underbar_to_camel(char *dest, const char *str)
     return dest;
 }
 
-static char *generate_form_data(ghowst_url_parameter *arguments, int num_args)
+static char *generate_form_data(ghowst_url_parameter_t *arguments, int num_args)
 {
     CURL *curl_handle = curl_easy_init();
 
@@ -130,7 +130,7 @@ static char *generate_form_data(ghowst_url_parameter *arguments, int num_args)
     return qs;
 }
 
-static char *generate_qs(ghowst_url_parameter *arguments, int num_args)
+static char *generate_qs(ghowst_url_parameter_t *arguments, int num_args)
 {
     char *qs = calloc(99, sizeof *qs);
 
@@ -157,7 +157,7 @@ static char *generate_mimeqs()
     return qs;
 }
 
-static void check_error(CURLcode result_code, ghowsthandle *ghowst)
+static void check_error(CURLcode result_code, ghowsthandle_t *ghowst)
 {
     if (result_code == CURLE_OK) {
         long http_status_code;
@@ -191,9 +191,9 @@ static void check_error(CURLcode result_code, ghowsthandle *ghowst)
     }
 }
 
-char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parameter *arguments, int num_args)
+char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parameter_t *arguments, int num_args)
 {
-    ghowsthandle *ghowst = (ghowsthandle *) ghowsth;
+    ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
 
     char verb[20];
     char entity[128];
@@ -228,7 +228,7 @@ char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parame
     ghowst->curl_handle = curl_easy_init();
     struct curl_slist *headers = curl_slist_append(NULL, "accept: application/json");
 
-    struct memory_struct chunk;
+    struct memory chunk;
     chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
     chunk.size = 0; /* no data at this point */
 
@@ -254,7 +254,7 @@ char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parame
         check_error(result_code, ghowst);
     } else if (strcmp(verb, "create") == 0) {
         _Bool has_file = false;
-        ghowst_url_parameter *arguments_copy;
+        ghowst_url_parameter_t *arguments_copy;
 
         arguments_copy = arguments;
         for (int i = 0; i < num_args; i++, arguments_copy++) {
@@ -424,16 +424,16 @@ char *ghowst_invoke(ghowsth *ghowsth, const char *method_name, ghowst_url_parame
     return chunk.memory;
 }
 
-ghowsthttp_web_service_error ghowst_last_error(ghowsth *ghowsth)
+ghowsthttp_web_service_error_t ghowst_last_error(ghowsth *ghowsth)
 {
-    ghowsthandle *ghowst = (ghowsthandle *) ghowsth;
+    ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
 
     return ghowst->last_http_web_service_error;
 }
 
 ghowsth *ghowst_init(char *base_url)
 {
-    ghowsthandle *ghowst = malloc(sizeof *ghowst);
+    ghowsthandle_t *ghowst = malloc(sizeof *ghowst);
 
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -444,7 +444,7 @@ ghowsth *ghowst_init(char *base_url)
 
 void ghowst_cleanup(ghowsth *ghowsth)
 {
-    ghowsthandle *ghowst = (ghowsthandle *) ghowsth;
+    ghowsthandle_t *ghowst = (ghowsthandle_t *) ghowsth;
 
     curl_easy_cleanup(ghowst->curl_handle);
     curl_global_cleanup();

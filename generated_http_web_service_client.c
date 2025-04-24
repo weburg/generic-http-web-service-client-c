@@ -1,12 +1,13 @@
+#include <stdlib.h>
 #include <cjson/cJSON.h>
 
 #include "weburg/ghowst/http_web_service_invoker.h"
 #include "generated_http_web_service_client.h"
 
 #define NUM_ARGS 1
-engine *get_engines(ghowsth *ghowst, int id)
+engine_t *get_engines(ghowsth *ghowst, int id)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -25,9 +26,9 @@ engine *get_engines(ghowsth *ghowst, int id)
         num_results = cJSON_GetArraySize(json);
     }
 
-    engine *engines = malloc(sizeof *engines * (num_results + 1));
+    engine_t *engines = malloc(sizeof *engines * (num_results + 1));
 
-    engine *engines_fill = engines;
+    engine_t *engines_fill = engines;
 
     if (num_results && cJSON_IsObject(json)) {
         engines_fill->id = cJSON_GetObjectItemCaseSensitive(json, "id")->valueint;
@@ -57,9 +58,9 @@ engine *get_engines(ghowsth *ghowst, int id)
 #undef NUM_ARGS
 
 #define NUM_ARGS 3
-int create_engines(ghowsth *ghowst, engine engine)
+int create_engines(ghowsth *ghowst, engine_t engine)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     arguments[0].name = "engine.name";
     arguments[0].value = engine.name;
@@ -89,9 +90,9 @@ int create_engines(ghowsth *ghowst, engine engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int create_or_replace_engines(ghowsth *ghowst, engine engine)
+int create_or_replace_engines(ghowsth *ghowst, engine_t engine)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
@@ -127,9 +128,9 @@ int create_or_replace_engines(ghowsth *ghowst, engine engine)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-void update_engines(ghowsth *ghowst, engine engine)
+void update_engines(ghowsth *ghowst, engine_t engine)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", engine.id);
@@ -161,7 +162,7 @@ void update_engines(ghowsth *ghowst, engine engine)
 #define NUM_ARGS 1
 void delete_engines(ghowsth *ghowst, int id)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -177,7 +178,7 @@ void delete_engines(ghowsth *ghowst, int id)
 #define NUM_ARGS 1
 void restart_engines(ghowsth *ghowst, int id)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", id);
@@ -191,9 +192,9 @@ void restart_engines(ghowsth *ghowst, int id)
 #undef NUM_ARGS
 
 #define NUM_ARGS 2
-char *create_photos(ghowsth *ghowst, photo photo)
+char *create_photos(ghowsth *ghowst, photo_t photo)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     arguments[0].name = "photo.caption";
     arguments[0].value = photo.caption;
@@ -211,7 +212,7 @@ char *create_photos(ghowsth *ghowst, photo photo)
 #define NUM_ARGS 1
 void play_sounds(ghowsth *ghowst, char *name)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     arguments[0].name = "name";
     arguments[0].value = name;
@@ -223,9 +224,9 @@ void play_sounds(ghowsth *ghowst, char *name)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int race_trucks(ghowsth *ghowst, truck truck1, truck truck2)
+int race_trucks(ghowsth *ghowst, truck_t truck1, truck_t truck2)
 {
-    ghowst_url_parameter arguments[NUM_ARGS];
+    ghowst_url_parameter_t arguments[NUM_ARGS];
 
     char value0[11];
     sprintf(value0, "%d", truck1.engine_id);

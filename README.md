@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     ghowsth *ghowst = ghowst_init("http://localhost:8081/generichttpws");
 
     // Create
-    engine engine = {
+    engine_t engine = {
             .name = "CengineGenerated",
             .cylinders = 44,
             .throttle_setting = 49

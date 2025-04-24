@@ -7,6 +7,6 @@ typedef struct photo {
     char *name;
     char *caption;
     FILE *photo_file;
-} photo;
+} photo_t;
 
 #endif //PHOTO_H

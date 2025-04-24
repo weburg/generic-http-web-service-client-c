@@ -5,6 +5,6 @@ typedef struct truck {
     int id;
     int engine_id;
     char *name;
-} truck;
+} truck_t;
 
 #endif //TRUCK_H
