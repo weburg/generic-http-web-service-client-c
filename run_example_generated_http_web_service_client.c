@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     // CreateOrReplace (which will replace)
     engine_t engine_replacement = {
             .id = engine_id2,
-            .name = "CengineReplacement",
+            .name = "Cengine2Replacement",
             .cylinders = 56,
             .throttle_setting = 59
     };
