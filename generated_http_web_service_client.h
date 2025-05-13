@@ -31,6 +31,6 @@ char *create_sounds(sound_t sound);
 
 void play_sounds(ghowsth ghowst, char *name);
 
-int race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2);
+char *race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2);
 
 #endif //GENERATED_HTTP_WEB_SERVICE_CLIENT_H

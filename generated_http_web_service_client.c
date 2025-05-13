@@ -224,7 +224,7 @@ void play_sounds(ghowsth ghowst, char *name)
 #undef NUM_ARGS
 
 #define NUM_ARGS 4
-int race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2)
+char *race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -248,13 +248,6 @@ int race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2)
     arguments[3].value = truck2.name;
     arguments[3].file = NULL;
 
-    char *result = ghowst_invoke(ghowst, __FUNCTION__, arguments, NUM_ARGS);
-
-    cJSON *json = cJSON_Parse(result);
-    int result_id = (int) cJSON_GetNumberValue(json);
-
-    free(result);
-
-    return result_id;
+    return ghowst_invoke(ghowst, __FUNCTION__, arguments, NUM_ARGS);
 }
 #undef NUM_ARGS

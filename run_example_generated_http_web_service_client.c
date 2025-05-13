@@ -111,11 +111,10 @@ int main(int argc, char *argv[])
             .name = "Ford",
             .engine_id = engine_id2
     };
-    int truck_name_compare_result = race_trucks(ghowst, truck1, truck2);
+    char *truck_result = race_trucks(ghowst, truck1, truck2);
 
-    if (truck_name_compare_result == 0) {
-        printf("Did not expect both trucks to have the same name.\n");
-    }
+    printf("Race result: %s\n", truck_result);
+    free(truck_result);
 
     // Induce a not found error and catch it
 
