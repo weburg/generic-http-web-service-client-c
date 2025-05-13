@@ -13,13 +13,13 @@ int create_engines(ghowsth ghowst, engine_t engine);
 
 int create_or_replace_engines(ghowsth ghowst, engine_t engine);
 
-void update_engines(ghowsth ghowst, engine_t engine);
+int update_engines(ghowsth ghowst, engine_t engine);
 
 void delete_engines(ghowsth ghowst, int id);
 
-void restart_engines(ghowsth ghowst, int id);
+int restart_engines(ghowsth ghowst, int id);
 
-void stop_engines(int id);
+int stop_engines(int id);
 
 photo_t *get_photos(char *name);
 

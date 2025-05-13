@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     // Create
     photo_t photo = {
             .name = "Sealion-e1517614416654.jpg",
-            .caption = "Some C generated",
+            .caption = "Some C",
             .photo_file = fopen("../Sealion-e1517614416654.jpg", "rb")
     };
     char *photo_file_name = create_photos(ghowst, photo);
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     // Create
     engine_t engine_create = {
-            .name = "CengineGenerated",
+            .name = "Cengine",
             .cylinders = 44,
             .throttle_setting = 49
     };
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     // CreateOrReplace (which will create)
     engine_t engine_created_not_replaced = {
             .id = -1,
-            .name = "CengineCreatedNotReplacedGenerated",
+            .name = "CengineCreatedNotReplaced",
             .cylinders = 45,
             .throttle_setting = 50
     };
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     // Prepare for CreateOrReplace
     engine_t engine_create2 = {
-            .name = "Cengine2Generated",
+            .name = "Cengine2",
             .cylinders = 44,
             .throttle_setting = 49
     };
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     // Prepare for Update
     engine_t engine_create3 = {
-            .name = "Cengine3Generated",
+            .name = "Cengine3",
             .cylinders = 44,
             .throttle_setting = 49
     };
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     // Update
     engine_t engine_update = {
             .id = engine_id3,
-            .name = "Cengine3GeneratedUpdated",
+            .name = "Cengine3Generated",
             .cylinders = 44,
             .throttle_setting = 49
     };
