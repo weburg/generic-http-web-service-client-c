@@ -5,6 +5,44 @@
 #include "generated_http_web_service_client.h"
 
 #define NUM_ARGS 1
+void play_sounds(ghowsth ghowst, char *name)
+{
+    ghowst_url_parameter_t arguments[NUM_ARGS];
+
+    arguments[0].name = "name";
+    arguments[0].value = name;
+    arguments[0].file = NULL;
+
+    ghowst_invoke(ghowst, __FUNCTION__, arguments, NUM_ARGS);
+}
+#undef NUM_ARGS
+
+#define NUM_ARGS 2
+char *create_images(ghowsth ghowst, image_t image)
+{
+    ghowst_url_parameter_t arguments[NUM_ARGS];
+
+    arguments[0].name = "image.caption";
+    arguments[0].value = image.caption;
+    arguments[0].file = NULL;
+
+    arguments[1].name = "image.image_file";
+    arguments[1].value = NULL;
+    arguments[1].file = image.image_file;
+    arguments[1].file_name = image.name;
+
+    char *result = ghowst_invoke(ghowst, __FUNCTION__, arguments, NUM_ARGS);
+
+    cJSON *json = cJSON_Parse(result);
+    char *result_name = cJSON_GetStringValue(json);
+
+    free(result);
+
+    return result_name;
+}
+#undef NUM_ARGS
+
+#define NUM_ARGS 1
 engine_t *get_engines(ghowsth ghowst, int id)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
@@ -199,44 +237,6 @@ int restart_engines(ghowsth ghowst, int id)
     free(result);
 
     return result_id;
-}
-#undef NUM_ARGS
-
-#define NUM_ARGS 2
-char *create_photos(ghowsth ghowst, photo_t photo)
-{
-    ghowst_url_parameter_t arguments[NUM_ARGS];
-
-    arguments[0].name = "photo.caption";
-    arguments[0].value = photo.caption;
-    arguments[0].file = NULL;
-
-    arguments[1].name = "photo.photo_file";
-    arguments[1].value = NULL;
-    arguments[1].file = photo.photo_file;
-    arguments[1].file_name = photo.name;
-
-    char *result = ghowst_invoke(ghowst, __FUNCTION__, arguments, NUM_ARGS);
-
-    cJSON *json = cJSON_Parse(result);
-    char *result_name = cJSON_GetStringValue(json);
-
-    free(result);
-
-    return result_name;
-}
-#undef NUM_ARGS
-
-#define NUM_ARGS 1
-void play_sounds(ghowsth ghowst, char *name)
-{
-    ghowst_url_parameter_t arguments[NUM_ARGS];
-
-    arguments[0].name = "name";
-    arguments[0].value = name;
-    arguments[0].file = NULL;
-
-    ghowst_invoke(ghowst, __FUNCTION__, arguments, NUM_ARGS);
 }
 #undef NUM_ARGS
 

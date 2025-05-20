@@ -3,9 +3,19 @@
 
 #include "weburg/ghowst/http_web_service_invoker.h"
 #include "engine.h"
-#include "photo.h"
+#include "image.h"
 #include "sound.h"
 #include "truck.h"
+
+sound_t *get_sounds(char *name);
+
+char *create_sounds(sound_t sound);
+
+void play_sounds(ghowsth ghowst, char *name);
+
+image_t *get_images(char *name);
+
+char *create_images(ghowsth ghowst, image_t image);
 
 engine_t *get_engines(ghowsth ghowst, int id);
 
@@ -20,16 +30,6 @@ void delete_engines(ghowsth ghowst, int id);
 int restart_engines(ghowsth ghowst, int id);
 
 int stop_engines(int id);
-
-photo_t *get_photos(char *name);
-
-char *create_photos(ghowsth ghowst, photo_t photo);
-
-sound_t *get_sounds(char *name);
-
-char *create_sounds(sound_t sound);
-
-void play_sounds(ghowsth ghowst, char *name);
 
 char *race_trucks(ghowsth ghowst, truck_t truck1, truck_t truck2);
 

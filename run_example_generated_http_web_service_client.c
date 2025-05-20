@@ -7,16 +7,16 @@ int main(int argc, char *argv[])
 {
     ghowsth ghowst = ghowst_init("http://localhost:8081/generichttpws");
 
-    /*** Photo ***/
+    /*** Image ***/
 
     // Create
-    photo_t photo = {
+    image_t image = {
             .name = "Sealion-e1517614416654.jpg",
             .caption = "Some C",
-            .photo_file = fopen("../Sealion-e1517614416654.jpg", "rb")
+            .image_file = fopen("../Sealion-e1517614416654.jpg", "rb")
     };
-    char *photo_file_name = create_photos(ghowst, photo);
-    free(photo_file_name);
+    char *image_file_name = create_images(ghowst, image);
+    free(image_file_name);
 
     /*** Engine ***/
 
