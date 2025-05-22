@@ -5,6 +5,7 @@
 #include "engine.h"
 #include "image.h"
 #include "sound.h"
+#include "video.h"
 #include "truck.h"
 
 sound_t *get_sounds(char *name);
@@ -16,6 +17,10 @@ void play_sounds(ghowsth ghowst, char *name);
 image_t *get_images(char *name);
 
 char *create_images(ghowsth ghowst, image_t image);
+
+video_t *get_videos(char *name);
+
+char *create_videos(video_t video);
 
 engine_t *get_engines(ghowsth ghowst, int id);
 
