@@ -5,6 +5,7 @@
 
 typedef struct sound {
     char *name;
+    char *caption;
     FILE *sound_file;
 } sound_t;
 
