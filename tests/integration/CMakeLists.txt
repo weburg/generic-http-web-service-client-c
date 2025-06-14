@@ -1,0 +1,2 @@
+# Test via the example application
+add_test(NAME integration_run_example_as_tests COMMAND run_example_generic_http_web_service_client WORKING_DIRECTORY $<TARGET_FILE_DIR:run_example_generic_http_web_service_client>)

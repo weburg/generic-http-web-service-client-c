@@ -64,3 +64,13 @@ you:
 
 The example runs several calls to create, update, replace, read, delete, and do
 a custom action on resources.
+
+### Running the tests
+
+To run unit tests only:
+
+`ctest -R ^unit`
+
+To run unit and integration tests:
+
+`ctest`

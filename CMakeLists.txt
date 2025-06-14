@@ -25,3 +25,7 @@ find_package(cJSON CONFIG REQUIRED)
 
 # vcpkg install curl curl[ssl]
 find_package(CURL CONFIG REQUIRED)
+
+enable_testing()
+add_subdirectory(tests/unit)
+add_subdirectory(tests/integration)
