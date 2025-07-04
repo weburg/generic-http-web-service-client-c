@@ -66,9 +66,7 @@ int main(int argc, char *argv[])
     // Update
     engine_t engine_update = {
             .id = engine_id3,
-            .name = "Cengine3Updated",
-            .cylinders = 44,
-            .throttle_setting = 49
+            .name = "Cengine3Updated"
     };
     update_engines(ghowst, engine_update);
 
