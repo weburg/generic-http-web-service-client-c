@@ -8,8 +8,8 @@ set(SOURCE_FILES
         ../../sound.h
         ../../truck.h
         ../../video.h
-        unit_tests.c)
-add_executable(unit_tests ${SOURCE_FILES})
-target_link_libraries(unit_tests PRIVATE cjson CURL::libcurl)
+)
+add_executable(service_exception service_exception.c ${SOURCE_FILES})
+target_link_libraries(service_exception PRIVATE cjson CURL::libcurl)
 
-add_test(NAME unit_tests COMMAND unit_tests)
+add_test(NAME unit_service_exception COMMAND service_exception)

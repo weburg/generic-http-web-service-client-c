@@ -67,6 +67,8 @@ a custom action on resources.
 
 ### Running the tests
 
+Ensure you are in the build tree. Then,
+
 To run unit tests only:
 
 `ctest -R ^unit`
