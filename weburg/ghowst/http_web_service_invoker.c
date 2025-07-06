@@ -147,16 +147,6 @@ static char *generate_qs(ghowst_url_parameter_t *arguments, int num_args)
     return qs;
 }
 
-static char *generate_mimeqs()
-{
-    // TODO move the file upload field generation code here to support file
-    // uploads in other calls.
-
-    char *qs = {"\0"};
-
-    return qs;
-}
-
 static void check_error(CURLcode result_code, ghowst_handle_t *ghowst)
 {
     if (result_code == CURLE_OK) {
@@ -191,233 +181,199 @@ static void check_error(CURLcode result_code, ghowst_handle_t *ghowst)
     }
 }
 
+static void execute_and_handle(ghowst_handle_t *ghowst, struct memory *chunk, struct curl_slist *headers, ghowst_url_parameter_t *arguments, int num_args, char *query_string, _Bool has_file, curl_mime *mime_handle)
+{
+    curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+    curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) chunk);
+    curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
+
+    CURLcode result_code = curl_easy_perform(ghowst->curl_handle);
+
+    check_error(result_code, ghowst);
+
+    if (!has_file) {
+        if (query_string != NULL) {
+            free(query_string);
+        }
+    } else {
+        curl_mime_free(mime_handle);
+
+        ghowst_url_parameter_t *arguments_copy = arguments;
+        for (int i = 0; i < num_args; i++, arguments_copy++) {
+            if (arguments_copy->file) {
+                fclose(arguments_copy->file);
+            }
+        }
+    }
+}
+
+static _Bool write_http_entity_from_arguments(ghowst_handle_t *ghowst, ghowst_url_parameter_t *arguments, int num_args, char *query_string, curl_mime *mime_handle)
+{
+    _Bool has_file = false;
+    ghowst_url_parameter_t *arguments_copy;
+
+    arguments_copy = arguments;
+    for (int i = 0; i < num_args; i++, arguments_copy++) {
+        if (arguments_copy->file != NULL) {
+            has_file = true;
+            break;
+        }
+    }
+
+    if (!has_file) {
+        query_string = generate_form_data(arguments, num_args);
+
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
+    } else {
+        mime_handle = curl_mime_init(ghowst->curl_handle);
+        curl_mimepart *mime_part;
+
+        arguments_copy = arguments;
+        for (int i = 0; i < num_args; i++, arguments_copy++) {
+            if (arguments_copy->file == NULL) {
+                char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof *new_name);
+                mime_part = curl_mime_addpart(mime_handle);
+                curl_mime_name(mime_part, underbar_to_camel(new_name, arguments_copy->name));
+                curl_mime_data(mime_part, arguments_copy->value, CURL_ZERO_TERMINATED);
+                free(new_name);
+            } else if (arguments_copy->file) {
+                fseek(arguments_copy->file, 0, SEEK_END);
+                long length = ftell(arguments_copy->file);
+                fseek(arguments_copy->file, 0, SEEK_SET);
+
+                char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof *new_name);
+                mime_part = curl_mime_addpart(mime_handle);
+                curl_mime_name(mime_part, underbar_to_camel(new_name, arguments_copy->name));
+                curl_mime_filename(mime_part, arguments_copy->file_name);
+                curl_mime_data_cb(mime_part, length, (curl_read_callback) fread,
+                                  (curl_seek_callback) fseek, NULL, arguments_copy->file);
+                free(new_name);
+            }
+        }
+
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_MIMEPOST, mime_handle);
+    }
+
+    return has_file;
+}
+
 char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_parameter_t *arguments, int num_args)
 {
     ghowst_handle_t *ghowst = (ghowst_handle_t *) ghowsth;
 
     char verb[20];
-    char entity[128];
+    char resource[128];
 
     if (starts_with(method_name, "get")) {
         strncpy(verb, "get", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(resource, get_entity_name(method_name, verb), 128);
     } else if (starts_with(method_name, "create_or_replace")) {
         strncpy(verb, "create_or_replace", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(resource, get_entity_name(method_name, verb), 128);
     } else if (starts_with(method_name, "create")) {
         strncpy(verb, "create", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(resource, get_entity_name(method_name, verb), 128);
     } else if (starts_with(method_name, "update") ) {
         strncpy(verb, "update", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(resource, get_entity_name(method_name, verb), 128);
     } else if (starts_with(method_name, "delete")) {
         strncpy(verb, "delete", 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(resource, get_entity_name(method_name, verb), 128);
     } else {
         char *method_name_to_scan = strdup(method_name);
         char *tokenized_string = strtok(method_name_to_scan, "_");
 
         strncpy(verb, tokenized_string, 20);
-        strncpy(entity, get_entity_name(method_name, verb), 128);
+        strncpy(resource, get_entity_name(method_name, verb), 128);
     }
 
     printf("Verb: %s\n", verb);
-    printf("Entity: %s\n", entity);
+    printf("Resource: %s\n", resource);
 
-    CURLcode result_code;
     ghowst->curl_handle = curl_easy_init();
+    curl_mime *mime_handle = curl_mime_init(ghowst->curl_handle);
     struct curl_slist *headers = curl_slist_append(NULL, "accept: application/json");
 
     struct memory chunk;
-    chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
-    chunk.size = 0; /* no data at this point */
+    chunk.memory = malloc(1); // Will be grown as needed
+    chunk.size = 0; // No data at this point
 
     if (strcmp(verb, "get") == 0) {
         char *query_string = generate_qs(arguments, num_args);
-
         char ws_url[300];
         strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
-        strncat(ws_url, entity, 50);
+        strncat(ws_url, resource, 50);
         strncat(ws_url, query_string, strlen(query_string));
-
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
-
-        result_code = curl_easy_perform(ghowst->curl_handle);
-
-        free(query_string);
-
-        check_error(result_code, ghowst);
+        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, false, mime_handle);
     } else if (strcmp(verb, "create") == 0) {
-        _Bool has_file = false;
-        ghowst_url_parameter_t *arguments_copy;
-
-        arguments_copy = arguments;
-        for (int i = 0; i < num_args; i++, arguments_copy++) {
-            if (arguments_copy->file != NULL) {
-                has_file = true;
-                break;
-            }
-        }
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
 
         char ws_url[300];
         strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
-        strncat(ws_url, entity, 25);
-
+        strncat(ws_url, resource, 25);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
-
-        curl_mime *mime_handle;
 
         char *query_string = NULL;
+        _Bool has_file = write_http_entity_from_arguments(ghowst, arguments, num_args, query_string, mime_handle);
 
-        if (!has_file) {
-            query_string = generate_form_data(arguments, num_args);
-
-            curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
-            curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
-        } else {
-            mime_handle = curl_mime_init(ghowst->curl_handle);
-            curl_mimepart *mime_part;
-
-            arguments_copy = arguments;
-            for (int i = 0; i < num_args; i++, arguments_copy++) {
-                if (arguments_copy->file == NULL) {
-                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof *new_name);
-                    mime_part = curl_mime_addpart(mime_handle);
-                    curl_mime_name(mime_part, underbar_to_camel(new_name, arguments_copy->name));
-                    curl_mime_data(mime_part, arguments_copy->value, CURL_ZERO_TERMINATED);
-                    free(new_name);
-                } else if (arguments_copy->file) {
-                    fseek(arguments_copy->file, 0, SEEK_END);
-                    long length = ftell(arguments_copy->file);
-                    fseek(arguments_copy->file, 0, SEEK_SET);
-
-                    char *new_name = calloc(strlen(arguments_copy->name) + 1, sizeof *new_name);
-                    mime_part = curl_mime_addpart(mime_handle);
-                    curl_mime_name(mime_part, underbar_to_camel(new_name, arguments_copy->name));
-                    curl_mime_filename(mime_part, arguments_copy->file_name);
-                    curl_mime_data_cb(mime_part, length, (curl_read_callback) fread,
-                                      (curl_seek_callback) fseek, NULL, arguments_copy->file);
-                    free(new_name);
-                }
-            }
-
-            curl_easy_setopt(ghowst->curl_handle, CURLOPT_MIMEPOST, mime_handle);
-        }
-
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
-
-        result_code = curl_easy_perform(ghowst->curl_handle);
-
-        if (query_string != NULL) {
-            free(query_string);
-        }
-
-        check_error(result_code, ghowst);
-
-        if (has_file) {
-            curl_mime_free(mime_handle);
-
-            arguments_copy = arguments;
-            for (int i = 0; i < num_args; i++, arguments_copy++) {
-                if (arguments_copy->file) {
-                    fclose(arguments_copy->file);
-                }
-            }
-        }
+        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, has_file, mime_handle);
     } else if (strcmp(verb, "create_or_replace") == 0) {
-        char *query_string = generate_form_data(arguments, num_args);
-
-        char ws_url[300];
-        strncpy(ws_url, ghowst->base_url, 150);
-        strncat(ws_url, "/", 1);
-        strncat(ws_url, entity, 50);
-
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PUT");
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
+        char *query_string = NULL;
+        _Bool has_file = write_http_entity_from_arguments(ghowst, arguments, num_args, query_string, mime_handle);
 
-        result_code = curl_easy_perform(ghowst->curl_handle);
+        char ws_url[300];
+        strncpy(ws_url, ghowst->base_url, 150);
+        strncat(ws_url, "/", 1);
+        strncat(ws_url, resource, 50);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
 
-        free(query_string);
-
-        check_error(result_code, ghowst);
+        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, has_file, mime_handle);
     } else if (strcmp(verb, "update") == 0) {
-        char *query_string = generate_form_data(arguments, num_args);
-
-        char ws_url[300];
-        strncpy(ws_url, ghowst->base_url, 150);
-        strncat(ws_url, "/", 1);
-        strncat(ws_url, entity, 50);
-
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
-
-        result_code = curl_easy_perform(ghowst->curl_handle);
-
-        free(query_string);
-
-        check_error(result_code, ghowst);
-    } else if (strcmp(verb, "delete") == 0) {
-        char *query_string = generate_qs(arguments, num_args);
+        char *query_string = NULL;
+        _Bool has_file = write_http_entity_from_arguments(ghowst, arguments, num_args, query_string, mime_handle);
 
         char ws_url[300];
         strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
-        strncat(ws_url, entity, 50);
-        strncat(ws_url, query_string, strlen(query_string));
-
+        strncat(ws_url, resource, 50);
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
+
+        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, has_file, mime_handle);
+    } else if (strcmp(verb, "delete") == 0) {
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
+        char *query_string = generate_qs(arguments, num_args);
+        char ws_url[300];
+        strncpy(ws_url, ghowst->base_url, 150);
+        strncat(ws_url, "/", 1);
+        strncat(ws_url, resource, 50);
+        strncat(ws_url, query_string, strlen(query_string));
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
 
-        result_code = curl_easy_perform(ghowst->curl_handle);
-
-        free(query_string);
-
-        check_error(result_code, ghowst);
+        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, false, mime_handle);
     } else {
-        char *query_string = generate_form_data(arguments, num_args);
+        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
+
+        char *query_string = NULL;
+        _Bool has_file = write_http_entity_from_arguments(ghowst, arguments, num_args, query_string, mime_handle);
 
         char ws_url[300];
         strncpy(ws_url, ghowst->base_url, 150);
         strncat(ws_url, "/", 1);
-        strncat(ws_url, entity, 50);
+        strncat(ws_url, resource, 50);
         strncat(ws_url, "/", 1);
         strncat(ws_url, verb, 50);
-
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POSTFIELDS, query_string);
 
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_HTTPHEADER, headers);
-
-        result_code = curl_easy_perform(ghowst->curl_handle);
-
-        free(query_string);
-
-        check_error(result_code, ghowst);
+        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, has_file, mime_handle);
     }
 
     curl_slist_free_all(headers);

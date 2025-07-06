@@ -13,9 +13,8 @@ int main(int argc, char *argv[])
         .throttle_setting = 50
     };
     int engine_id = create_engines(ghowst, engine);
-    ghowsthttp_web_service_error_t error = ghowst_last_error(ghowst);
 
-    assert(error.error == 0);
+    assert(!ghowst_last_error(ghowst).error);
     assert(engine_id > 0);
 
     ghowst_cleanup(ghowst);

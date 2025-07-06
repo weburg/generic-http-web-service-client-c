@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
             .image_file = fopen("../Sealion-e1517614416654.jpg", "rb")
     };
     char *image_file_name = create_images(ghowst, image);
+    assert(!ghowst_last_error(ghowst).error);
     free(image_file_name);
 
     /*** Engine ***/
@@ -27,6 +29,7 @@ int main(int argc, char *argv[])
             .throttle_setting = 49
     };
     int engine_id1 = create_engines(ghowst, engine_create);
+    assert(!ghowst_last_error(ghowst).error);
 
     // CreateOrReplace (which will create)
     engine_t engine_created_not_replaced = {
@@ -37,6 +40,7 @@ int main(int argc, char *argv[])
     };
 
     create_or_replace_engines(ghowst, engine_created_not_replaced);
+    assert(!ghowst_last_error(ghowst).error);
 
     // Prepare for CreateOrReplace
     engine_t engine_create2 = {
@@ -45,6 +49,7 @@ int main(int argc, char *argv[])
             .throttle_setting = 49
     };
     int engine_id2 = create_engines(ghowst, engine_create2);
+    assert(!ghowst_last_error(ghowst).error);
 
     // CreateOrReplace (which will replace)
     engine_t engine_replacement = {
@@ -54,6 +59,7 @@ int main(int argc, char *argv[])
             .throttle_setting = 59
     };
     create_or_replace_engines(ghowst, engine_replacement);
+    assert(!ghowst_last_error(ghowst).error);
 
     // Prepare for Update
     engine_t engine_create3 = {
@@ -62,6 +68,7 @@ int main(int argc, char *argv[])
             .throttle_setting = 49
     };
     int engine_id3 = create_engines(ghowst, engine_create3);
+    assert(!ghowst_last_error(ghowst).error);
 
     // Update
     engine_t engine_update = {
@@ -69,14 +76,17 @@ int main(int argc, char *argv[])
             .name = "Cengine3Updated"
     };
     update_engines(ghowst, engine_update);
+    assert(!ghowst_last_error(ghowst).error);
 
     // Get
     engine_t *engine = get_engines(ghowst, engine_id1);
+    assert(!ghowst_last_error(ghowst).error);
     printf("Engine returned: %s\n", engine->name);
     free(engine);
 
     // Get all
     engine_t *engines = get_engines(ghowst, 0);
+    assert(!ghowst_last_error(ghowst).error);
     engine_t *engines_copy = engines;
 
     int count = 0;
@@ -92,12 +102,15 @@ int main(int argc, char *argv[])
             .throttle_setting = 70
     };
     int engine_id4 = create_engines(ghowst, engine_to_delete);
+    assert(!ghowst_last_error(ghowst).error);
 
     // Delete
     delete_engines(ghowst, engine_id4);
+    assert(!ghowst_last_error(ghowst).error);
 
     // Custom verb
     restart_engines(ghowst, engine_id2);
+    assert(!ghowst_last_error(ghowst).error);
 
     // Repeat, complex objects with different names
 
@@ -110,6 +123,7 @@ int main(int argc, char *argv[])
             .engine_id = engine_id2
     };
     char *truck_result = race_trucks(ghowst, truck1, truck2);
+    assert(!ghowst_last_error(ghowst).error);
 
     printf("Race result: %s\n", truck_result);
     free(truck_result);
