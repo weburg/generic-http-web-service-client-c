@@ -308,34 +308,14 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
         curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
 
         execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, false, mime_handle);
-    } else if (strcmp(verb, "create") == 0) {
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
-
-        char ws_url[300];
-        strncpy(ws_url, ghowst->base_url, 150);
-        strncat(ws_url, "/", 1);
-        strncat(ws_url, resource, 25);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
-
-        char *query_string = NULL;
-        _Bool has_file = write_http_entity_from_arguments(ghowst, arguments, num_args, query_string, mime_handle);
-
-        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, has_file, mime_handle);
-    } else if (strcmp(verb, "create_or_replace") == 0) {
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PUT");
-
-        char *query_string = NULL;
-        _Bool has_file = write_http_entity_from_arguments(ghowst, arguments, num_args, query_string, mime_handle);
-
-        char ws_url[300];
-        strncpy(ws_url, ghowst->base_url, 150);
-        strncat(ws_url, "/", 1);
-        strncat(ws_url, resource, 50);
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_URL, ws_url);
-
-        execute_and_handle(ghowst, &chunk, headers, arguments, num_args, query_string, has_file, mime_handle);
-    } else if (strcmp(verb, "update") == 0) {
-        curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
+    } else if (strcmp(verb, "create") == 0 || strcmp(verb, "create_or_replace") == 0 || strcmp(verb, "update") == 0) {
+        if (strcmp(verb, "create") == 0) {
+            curl_easy_setopt(ghowst->curl_handle, CURLOPT_POST, true);
+        } else if (strcmp(verb, "create_or_replace") == 0) {
+            curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PUT");
+        } else if (strcmp(verb, "update") == 0) {
+            curl_easy_setopt(ghowst->curl_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
+        }
 
         char *query_string = NULL;
         _Bool has_file = write_http_entity_from_arguments(ghowst, arguments, num_args, query_string, mime_handle);
