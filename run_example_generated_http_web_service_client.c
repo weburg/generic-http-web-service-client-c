@@ -71,11 +71,9 @@ int main(int argc, char *argv[])
     assert(!ghowst_last_error(ghowst).error);
 
     // Update
-    engine_t engine_update = {
-            .id = engine_id3,
-            .name = "Cengine3Updated"
-    };
-    update_engines(ghowst, engine_update);
+    engine_create3.id = engine_id3;
+    engine_create3.name = "Cengine3Updated";
+    update_engines(ghowst, engine_create3);
     assert(!ghowst_last_error(ghowst).error);
 
     // Get
