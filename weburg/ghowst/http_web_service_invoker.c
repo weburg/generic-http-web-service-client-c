@@ -287,8 +287,8 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
         strncpy(resource, get_entity_name(method_name, verb), 128);
     }
 
-    printf("Verb: %s\n", verb);
-    printf("Resource: %s\n", resource);
+    fprintf(stderr, "Verb: %s\n", verb);
+    fprintf(stderr,"Resource: %s\n", resource);
 
     ghowst->curl_handle = curl_easy_init();
     curl_mime *mime_handle = curl_mime_init(ghowst->curl_handle);
