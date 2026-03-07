@@ -38,12 +38,16 @@ int main(int argc, char *argv[])
 }
 ```
 
+### Setup
+
+Ensure a compiler (GCC, MSVC were tested) is installed. Ensure vcpkg is
+installed (it doesn't have to be on the PATH for the CLI build to work). Ensure
+CMake is installed.
+
 ### Running the example
 
 First, ensure the server is running. Refer to other grouped GHoWSt projects to
-get and run the server. Ensure a compiler (GCC, MSVC were tested) is installed.
-Ensure vcpkg is installed (it doesn't have to be on the PATH for the CLI build
-to work). Ensure CMake is installed.
+get and run the server.
 
 If using the CLI, ensure you are in the project directory. Run:
 
