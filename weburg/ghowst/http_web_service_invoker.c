@@ -249,19 +249,19 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
     char *resource = NULL;
 
     if (starts_with(method_name, "get")) {
-        verb = "get";
+        verb = g_strdup("get");
         resource = get_entity_name(method_name, verb);
     } else if (starts_with(method_name, "create_or_replace")) {
-        verb = "create_or_replace";
+        verb = g_strdup("create_or_replace");
         resource = get_entity_name(method_name, verb);
     } else if (starts_with(method_name, "create")) {
-        verb = "create";
+        verb = g_strdup("create");
         resource = get_entity_name(method_name, verb);
     } else if (starts_with(method_name, "update") ) {
-        verb = "update";
+        verb = g_strdup("update");
         resource = get_entity_name(method_name, verb);
     } else if (starts_with(method_name, "delete")) {
-        verb = "delete";
+        verb = g_strdup("delete");
         resource = get_entity_name(method_name, verb);
     } else {
         gchar **method_parts = g_strsplit(method_name, "_", 2);
@@ -346,6 +346,7 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
     }
 
     curl_slist_free_all(headers);
+    g_free(verb);
     g_free(resource);
     return chunk.memory;
 }
