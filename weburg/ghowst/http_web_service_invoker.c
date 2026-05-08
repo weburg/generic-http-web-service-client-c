@@ -247,7 +247,6 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
 
     char *verb = NULL;
     char *resource = NULL;
-    char *method_name_to_scan = NULL;
 
     if (starts_with(method_name, "get")) {
         verb = "get";
@@ -265,11 +264,14 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
         verb = "delete";
         resource = get_entity_name(method_name, verb);
     } else {
-        char *method_name_to_scan = _strdup(method_name);
-        char *tokenized_string = strtok(method_name_to_scan, "_");
+        gchar **method_parts = g_strsplit(method_name, "_", 2);
 
-        verb = tokenized_string;
-        resource = get_entity_name(method_name, verb);
+        if (method_parts[0] != NULL) {
+            verb = g_strdup(method_parts[0]);
+            resource = get_entity_name(method_name, verb);
+        }
+
+        g_strfreev(method_parts);
     }
 
     fprintf(stderr, "Verb: %s\n", verb);
@@ -345,7 +347,6 @@ char *ghowst_invoke(ghowsth ghowsth, const char *method_name, ghowst_url_paramet
 
     curl_slist_free_all(headers);
     g_free(resource);
-    free(method_name_to_scan);
     return chunk.memory;
 }
 
