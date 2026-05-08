@@ -1,6 +1,6 @@
 set(SOURCE_FILES
-        ../../generated_http_web_service_client.h
-        ../../generated_http_web_service_client.c
+        ../../example_http_web_service_client.h
+        ../../example_http_web_service_client.c
         ../../weburg/ghowst/http_web_service_invoker.h
         ../../weburg/ghowst/http_web_service_invoker.c
         ../../engine.h

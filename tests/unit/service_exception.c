@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "../../generated_http_web_service_client.h"
+#include "../../example_http_web_service_client.h"
 
 int main(int argc, char *argv[])
 {

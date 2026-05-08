@@ -9,18 +9,22 @@
 - Use local language semantics to talk to the server without an intermediate
   language. Unlike with dynamic languages though, the C client will need to be
   generated manually, but beyond that, the only other things needed are domain
-  object structs, the ghowst functions, and 3rd party dependencies from
-  vcpkg.json.
+  object structs, the library, and 3rd party dependencies from vcpkg.json.
 - Every call, using a method name convention to map to HTTP methods, gets
   translated to HTTP requests. Responses are parsed from JSON and mapped back to
   local structs.
+
+> [!NOTE]
+> Memory ownership and cleanup is not 100% handled, for the sake of a simpler
+> example. Basic memory management is done when practical, and string safety is
+> decent.
 
 ### Example code
 
 ```c
 #include <stdlib.h>
 
-#include "generated_http_web_service_client.h"
+#include "example_http_web_service_client.h"
 
 int main(int argc, char *argv[])
 {

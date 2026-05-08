@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "generated_http_web_service_client.h"
+#include "example_http_web_service_client.h"
 
 int main(int argc, char *argv[])
 {
@@ -77,20 +77,17 @@ int main(int argc, char *argv[])
     assert(!ghowst_last_error(ghowst).error);
 
     // Get
-    engine_t *engine = get_engines(ghowst, engine_id1);
+    engine_t *engine = get_engines(ghowst, engine_id1, NULL);
     assert(!ghowst_last_error(ghowst).error);
     printf("Engine returned: %s\n", engine->name);
     free(engine);
 
     // Get all
-    engine_t *engines = get_engines(ghowst, 0);
+    int engine_count;
+    engine_t *engines = get_engines(ghowst, 0, &engine_count);
     assert(!ghowst_last_error(ghowst).error);
-    engine_t *engines_copy = engines;
 
-    int count = 0;
-    for (; engines_copy->id != '\0'; engines_copy++, count++);
-
-    printf("Engines returned: %d\n", count);
+    printf("Engines returned: %d\n", engine_count);
     free(engines);
 
     // Prepare for delete
@@ -128,7 +125,7 @@ int main(int argc, char *argv[])
 
     // Induce a not found error and catch it
 
-    engine_t *engine_2 = get_engines(ghowst, -2);
+    engine_t *engine_2 = get_engines(ghowst, -2, NULL);
     ghowsthttp_web_service_error_t error = ghowst_last_error(ghowst);
     if (!error.error) {
         printf("Engine returned: %s\n", engine_2->name);
@@ -139,7 +136,7 @@ int main(int argc, char *argv[])
     ghowsth ghowst_fail = ghowst_init("http://nohost:8081/generichttpws");
 
     // Induce a service error and catch it
-    get_engines(ghowst_fail, -2);
+    get_engines(ghowst_fail, -2, NULL);
     ghowsthttp_web_service_error_t error2 = ghowst_last_error(ghowst_fail);
     if (error2.error) {
         printf("Status: %ld Message: %s\n", error2.http_status, error2.message);

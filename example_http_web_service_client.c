@@ -2,7 +2,7 @@
 #include <cjson/cJSON.h>
 
 #include "weburg/ghowst/http_web_service_invoker.h"
-#include "generated_http_web_service_client.h"
+#include "example_http_web_service_client.h"
 
 #define NUM_ARGS 1
 void play_sounds(ghowsth ghowst, char *name)
@@ -43,7 +43,7 @@ char *create_images(ghowsth ghowst, image_t image)
 #undef NUM_ARGS
 
 #define NUM_ARGS 1
-engine_t *get_engines(ghowsth ghowst, int id)
+engine_t *get_engines(ghowsth ghowst, int id, int *count)
 {
     ghowst_url_parameter_t arguments[NUM_ARGS];
 
@@ -64,7 +64,9 @@ engine_t *get_engines(ghowsth ghowst, int id)
         num_results = cJSON_GetArraySize(json);
     }
 
-    engine_t *engines = malloc(sizeof *engines * (num_results + 1));
+    if (count != NULL) *count = num_results;
+
+    engine_t *engines = malloc(sizeof *engines * num_results);
 
     engine_t *engines_fill = engines;
 
@@ -73,7 +75,6 @@ engine_t *get_engines(ghowsth ghowst, int id)
         engines_fill->name = cJSON_GetObjectItemCaseSensitive(json, "name")->valuestring;
         engines_fill->cylinders = cJSON_GetObjectItemCaseSensitive(json, "cylinders")->valueint;
         engines_fill->throttle_setting = cJSON_GetObjectItemCaseSensitive(json, "throttleSetting")->valueint;
-        engines_fill++;
     } else if (num_results && cJSON_IsArray(json)) {
         const cJSON *engine = NULL;
         cJSON_ArrayForEach(engine, json) {
@@ -85,11 +86,10 @@ engine_t *get_engines(ghowsth ghowst, int id)
         }
     }
 
-    engines_fill->id = '\0'; // Sentinel
-
     free(result);
-    // Don't call cJSON_Delete(json), its value was added to an array; if we delete it here it impacts returned value
-    // Instead, the caller will free the returned value, which cJSON says will in turn free cjson
+    // Don't call cJSON_Delete(json), its value was added to an array; if we delete it here it impacts returned value.
+    // Instead, the caller will free the returned value, but that won't free the json data backing the returned engines.
+    // For now, it's ok for this example to leak the json data, it's a short-lived application.
 
     return engines;
 }
